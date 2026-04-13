@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ translate('doctor') }} {{ translate('chat') }} | Snehdip SkinCare</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+        body{
+            background:url("/static/images/upload.jpeg") no-repeat center center fixed;
+            background-size:cover;
+            min-height:100vh;
+            display:flex;
+        }
+
+        /* Chat Container */
+        .chat-container{
+            width:900px;
+            margin:0 auto;
+            height:100vh;
+            background:rgba(255,255,255,0.15);
+            backdrop-filter:blur(15px);
+            box-shadow:0 8px 30px rgba(0,0,0,0.3);
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+        }
+
+        /* Chat Header */
+        .chat-header{
+            background:linear-gradient(135deg,#42a5f5,#ff4081);
+            color:#fff;
+            padding:20px;
+            text-align:center;
+            font-weight:600;
+            font-size:18px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            border-radius:20px 20px 0 0;
+            box-shadow:0 4px 15px rgba(79,172,254,0.3);
+        }
+
+        /* User Selection */
+        .user-selection{
+            background:rgba(255,255,255,0.15);
+            padding:25px;
+            border-bottom:1px solid rgba(255,255,255,0.3);
+            border-radius:0 0 20px 20px;
+        }
+
+        /* User Select */
+        .user-select{
+            width:100%;
+            padding:15px 20px;
+            border:2px solid rgba(255,255,255,0.3);
+            border-radius:12px;
+            font-size:16px;
+            background:rgba(255,255,255,0.15);
+            color:#404265;
+            transition:all 0.3s ease;
+            box-shadow:0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .user-select:hover{
+            border-color:linear-gradient(135deg,#42a5f5,#ff4081);
+            box-shadow:0 8px 16px rgba(79,172,254,0.15);
+            transform:translateY(-2px);
+        }
+
+        .user-select:focus{
+            outline:none;
+            border-color:linear-gradient(135deg,#42a5f5,#ff4081);
+            box-shadow:0 0 0 3px rgba(79,172,254,0.3);
+        }
+
+        /* Chat Messages */
+        .chat-messages{
+            flex:1;
+            padding:30px;
+            overflow-y:auto;
+            background:rgba(255,255,255,0.15);
+            scroll-behavior:smooth;
+        }
+
+        /* Message */
+        .message{
+            margin-bottom:20px;
+            display:flex;
+            max-width:75%;
+            animation:slideInUp 0.3s ease;
+        }
+
+        @keyframes slideInUp{
+            from{opacity:0;transform:translateY(20px);}
+            to{opacity:1;transform:translateY(0);}
+        }
+
+        .message.sent{
+            justify-content:flex-end;
+            margin-left:auto;
+        }
+
+        .message.received{
+            justify-content:flex-start;
+            margin-right:auto;
+        }
+
+        /* Message Bubble */
+        .message-bubble{
+            padding:15px 20px;
+            border-radius:18px;
+            word-wrap:break-word;
+            position:relative;
+            box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .message.sent .message-bubble{
+            background:linear-gradient(135deg,#42a5f5,#ff4081);
+            color:#fff;
+            border-bottom-right-radius:6px;
+        }
+
+        .message.received .message-bubble{
+            background:rgba(255,255,255,0.15);
+            color:#fff;
+            border:1px solid rgba(255,255,255,0.3);
+            border-bottom-left-radius:6px;
+        }
+
+        /* Message Time */
+        .message-time{
+            font-size:11px;
+            color:rgba(255,255,255,0.7);
+            margin-top:8px;
+            font-weight:500;
+        }
+
+        .message.sent .message-time{
+            text-align:right;
+        }
+
+        .message.received .message-time{
+            text-align:left;
+        }
+
+        /* Chat Input Container */
+        .chat-input-container{
+            display:flex;
+            padding:25px;
+            background:rgba(255,255,255,0.15);
+            border-top:1px solid rgba(255,255,255,0.3);
+            border-radius:0 0 20px 20px;
+        }
+
+        /* Chat Input */
+        .chat-input{
+            flex:1;
+            padding:18px 25px;
+            border:2px solid rgba(255,255,255,0.3);
+            border-radius:25px;
+            font-size:16px;
+            background:rgba(255,255,255,0.15);
+            color:#fff;
+            transition:all 0.3s ease;
+            box-shadow:0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .chat-input:focus{
+            outline:none;
+            border-color:linear-gradient(135deg,#42a5f5,#ff4081);
+            box-shadow:0 0 0 3px rgba(79,172,254,0.2);
+        }
+
+        /* Send Button */
+        .send-btn{
+            margin-left:15px;
+            padding:18px 30px;
+            background:linear-gradient(135deg,#42a5f5,#ff4081);
+            color:#fff;
+            border:none;
+            border-radius:25px;
+            cursor:pointer;
+            font-weight:600;
+            font-size:16px;
+            transition:all 0.3s ease;
+            box-shadow:0 4px 15px rgba(79,172,254,0.3);
+        }
+
+        .send-btn:hover{
+            transform:translateY(-2px);
+            box-shadow:0 8px 25px rgba(79,172,254,0.4);
+        }
+
+        .send-btn:active{
+            transform:translateY(0);
+        }
+
+        .send-btn:disabled{
+            background:rgba(255,255,255,0.15);
+            color:rgba(255,255,255,0.7);
+            cursor:not-allowed;
+            box-shadow:none;
+            transform:none;
+        }
+
+        /* Delete Button */
+        .delete-btn{
+            background:linear-gradient(135deg,#f87171,#dc2626);
+            color:#fff;
+            border:none;
+            padding:10px 20px;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:600;
+            font-size:14px;
+            transition:all 0.3s ease;
+            box-shadow:0 4px 12px rgba(248,113,113,0.3);
+        }
+
+        .delete-btn:hover{
+            transform:translateY(-1px);
+            box-shadow:0 6px 20px rgba(248,113,113,0.4);
+        }
+
+        .delete-btn:disabled{
+            background:rgba(255,255,255,0.15);
+            color:rgba(255,255,255,0.7);
+            cursor:not-allowed;
+            box-shadow:none;
+            transform:none;
+        }
+
+        /* Error Message */
+        .error-message{
+            background:linear-gradient(135deg,#fecaca,#f87171);
+            color:rgba(255,255,255,0.7);
+            padding:20px;
+            border-radius:12px;
+            text-align:center;
+            margin:20px;
+            font-weight:500;
+            box-shadow:0 4px 15px rgba(248,113,113,0.2);
+        }
+
+        /* Loading */
+        .loading{
+            text-align:center;
+            padding:40px;
+            color:rgba(255,255,255,0.7);
+            font-size:16px;
+        }
+
+        .loading::after{
+            content:'';
+            display:inline-block;
+            width:20px;
+            height:20px;
+            border:3px solid #4facfe;
+            border-radius:50%;
+            border-top-color:transparent;
+            animation:spin 1s linear infinite;
+            margin-left:10px;
+        }
+
+        @keyframes spin{
+            0%{transform:rotate(0deg);}
+            100%{transform:rotate(360deg);}
+        }
+
+        /* Info Message */
+        .info-message{
+            background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+            color:rgba(255,255,255,0.7);
+            padding:20px;
+            border-radius:12px;
+            text-align:center;
+            margin:20px;
+            font-weight:500;
+            box-shadow:0 4px 15px rgba(79,172,254,0.2);
+        }
+
+        /* Scrollbar Styling */
+        .chat-messages::-webkit-scrollbar{
+            width:8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track{
+            background:rgba(255,255,255,0.15);
+            border-radius:10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb{
+            background:rgba(255,255,255,0.3);
+            border-radius:10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover{
+            background:rgba(255,255,255,0.5);
+        }
+
+        /* Responsive Design */
+        @media (max-width:768px){
+            .chat-container{
+                margin:0;
+                border-radius:0;
+                height:100vh;
+            }
+
+            .chat-header{
+                border-radius:0;
+                padding:15px;
+                font-size:16px;
+            }
+
+            .user-selection{
+                padding:15px;
+                border-radius:0;
+            }
+
+            .chat-messages{
+                padding:20px;
+            }
+
+            .chat-input-container{
+                padding:15px;
+                border-radius:0;
+            }
+
+            .message{
+                max-width:85%;
+            }
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="chat-container">
+
+    <div class="chat-header">
+        <span id="chatWith">{{ translate('select_patient') }}</span>
+        <button id="deleteBtn" class="delete-btn" style="display:none;" onclick="deleteChat()">
+            {{ translate('delete_chat') }}
+        </button>
+    </div>
+
+    <div class="user-selection">
+        <select class="user-select" id="patientSelect">
+            <option value="">-- {{ translate('loading_patients') }} --</option>
+        </select>
+    </div>
+
+    <div class="chat-messages" id="chatBox">
+        <div class="loading">{{ translate('loading_chat') }}...</div>
+    </div>
+
+    <div class="chat-input-container">
+        <input
+            type="text"
+            class="chat-input"
+            id="chatInput"
+            placeholder="{{ translate('type_message') }}..."
+            disabled
+        >
+        <button class="send-btn" id="sendBtn" disabled>
+            {{ translate('send') }}
+        </button>
+    </div>
+
+</div>
+    <script>
+        let selectedPatientId = null;
+        let pollingInterval = null;
+        let currentUser = null;
+
+        const chatBox = document.getElementById("chatBox");
+        const chatInput = document.getElementById("chatInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const chatWith = document.getElementById("chatWith");
+        const patientSelect = document.getElementById("patientSelect");
+        const deleteBtn = document.getElementById("deleteBtn");
+
+        // Get current user from session (not JWT token)
+        function getCurrentUserFromSession() {
+            // Since this is a Flask app with session-based auth, we need to check session via API
+            // For now, we'll assume the user is authenticated if they can access this page
+            // The server-side session check will handle authentication
+
+            return {
+                id: null, // Will be set by server
+                role: 'doctor' // This page is only for doctors
+            };
+        }
+
+        // Fetch JWT token from server and store in localStorage
+        async function fetchAndStoreToken() {
+            try {
+                const response = await fetch('/api/token');
+                const data = await response.json();
+
+                if (data.success && data.token) {
+                    localStorage.setItem('token', data.token);
+                    console.log('JWT token fetched and stored');
+                    return true;
+                } else {
+                    console.error('Failed to fetch token:', data.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error fetching token:', error);
+                return false;
+            }
+        }
+
+        // Load registered patients using session-based authentication
+        async function loadPatients() {
+            try {
+                console.log('Loading registered patients...');
+                // Use API endpoint without JWT token (session-based auth)
+                const response = await fetch('http://127.0.0.1:5000/api/patients', {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Patients API response:', data);
+
+                if (data.success && data.patients) {
+                    patientSelect.innerHTML = '<option value="">Select Patient</option>';
+
+                    if (data.patients.length === 0) {
+                        patientSelect.innerHTML = '<option value="">No patients available</option>';
+                        chatBox.innerHTML = '<div style="color: #666; text-align: center;">No registered patients found. Please contact admin.</div>';
+                        return;
+                    }
+
+                    // Populate dropdown with patients
+                    data.patients.forEach(patient => {
+                        const option = document.createElement('option');
+                        option.value = patient._id || patient.id;
+                        option.textContent = patient.name;
+                        patientSelect.appendChild(option);
+                    });
+
+                    chatBox.innerHTML = '<div style="color: #666; text-align: center;">Please select a patient to start chatting</div>';
+                    console.log(`Loaded ${data.patients.length} patients`);
+                } else {
+                    console.error('Failed to load patients:', data.error);
+                    // Do NOT show login message, only console error
+                }
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                // Do NOT show login message, only console error
+            }
+        }
+
+        // Handle patient selection
+        patientSelect.addEventListener('change', async (e) => {
+            selectedPatientId = e.target.value;
+            console.log('Patient selected:', selectedPatientId);
+
+            // Clear polling
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+
+            if (!selectedPatientId) {
+                resetChatUI();
+                return;
+            }
+
+            const patientName = e.target.options[e.target.selectedIndex].textContent;
+            chatWith.textContent = `Chat with ${patientName}`;
+            deleteBtn.style.display = 'inline-block';
+
+            // Load chat history using new API
+            await loadChatHistory(selectedPatientId);
+
+            // Enable chat input
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+
+            // Start polling
+            startPolling();
+        });
+
+        // Load chat history with selected patient
+        async function loadChatHistory(patientId) {
+            try {
+                console.log('Loading chat history with patient:', patientId);
+                // Use API endpoint without JWT token (session-based auth)
+                const response = await fetch(`http://127.0.0.1:5000/api/messages/${patientId}`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Chat history response:', data);
+
+                if (data.success) {
+                    displayMessages(data.messages || data);
+                } else {
+                    console.error('Failed to load chat history:', data.error);
+                    chatBox.innerHTML = `<div style="color: red; text-align: center;">Failed to load chat history: ${data.error}</div>`;
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+                chatBox.innerHTML = '<div style="color: red; text-align: center;">Error loading chat history. Please try again.</div>';
+            }
+        }
+
+        // Display messages
+        function displayMessages(messages) {
+            chatBox.innerHTML = '';
+
+            if (messages.length === 0) {
+                chatBox.innerHTML = '<div style="color: #666; text-align: center;">No messages yet. Start the conversation!</div>';
+                return;
+            }
+
+            messages.forEach(msg => {
+                displayMessage(msg);
+            });
+
+            scrollToBottom();
+        }
+
+        // Display single message
+        function displayMessage(msg) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${msg.isFromCurrentUser ? 'sent' : 'received'}`;
+
+            const messageBubble = document.createElement("div");
+            messageBubble.className = "message-bubble";
+            messageBubble.textContent = msg.message;
+
+            messageDiv.appendChild(messageBubble);
+            chatBox.appendChild(messageDiv);
+        }
+
+        // Send message to selected patient
+        async function sendMessage() {
+            const messageText = chatInput.value.trim();
+            if (!messageText || !selectedPatientId) {
+                console.log('Cannot send message - missing text or patient ID');
+                if (!selectedPatientId) {
+                    alert('Please select a patient first');
+                }
+                return;
+            }
+
+            try {
+                console.log('Sending message:', {
+                    receiverId: selectedPatientId,
+                    message: messageText
+                });
+
+                // Use API endpoint without JWT token (session-based auth)
+                const response = await fetch('http://127.0.0.1:5000/api/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        receiverId: selectedPatientId,
+                        message: messageText
+                    })
+                });
+
+                const data = await response.json();
+                console.log('Send message response:', data);
+
+                if (data.success) {
+                    // Clear input
+                    chatInput.value = '';
+
+                    // Reload chat history to show new message
+                    await loadChatHistory(selectedPatientId);
+                } else {
+                    console.error('Failed to send message:', data.error);
+                    alert(`Failed to send message: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Error sending message. Please try again.');
+            }
+        }
+
+        // Delete chat with selected patient
+        async function deleteChat() {
+            if (!selectedPatientId) return;
+
+            if (!confirm('Are you sure you want to delete this chat history?')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.error('No token found');
+                    return;
+                }
+
+                const response = await fetch(`/api/messages/conversation/${selectedPatientId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Delete chat response:', data);
+
+                if (data.success) {
+                    // Reset UI
+                    patientSelect.value = '';
+                    resetChatUI();
+
+                    // Clear polling
+                    if (pollingInterval) {
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+                    }
+                } else {
+                    console.error('Failed to delete chat:', data.error);
+                    alert(`Failed to delete chat: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Error deleting chat:', error);
+                alert('Error deleting chat');
+            }
+        }
+
+        // Polling for new messages
+        function startPolling() {
+            if (pollingInterval) return;
+
+            pollingInterval = setInterval(async () => {
+                if (selectedPatientId) {
+                    await loadChatHistory(selectedPatientId);
+                }
+            }, 3000); // Poll every 3 seconds
+        }
+
+        // Reset chat UI
+        function resetChatUI() {
+            selectedPatientId = null;
+            chatWith.textContent = 'Select a patient';
+            deleteBtn.style.display = 'none';
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+            chatBox.innerHTML = '<div style="color: #666; text-align: center;">Please select a patient to start chatting</div>';
+        }
+
+        // Helper functions
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Initializing doctor chat...');
+
+            // Check authentication using session (server-side handles this)
+            currentUser = getCurrentUserFromSession();
+
+            if (currentUser) {
+                console.log('Current user:', currentUser);
+                loadPatients();
+            } else {
+                console.log('User not authenticated');
+                // Server-side authentication will handle redirect
+            }
+        });
+
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+        });
+    </script>
+</body>
+</html>

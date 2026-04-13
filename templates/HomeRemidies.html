@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HOME REMEDIES</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+    --bg: #071a2f;
+    --card: #0f2a44;
+    --primary: #4da3ff;
+    --text: #eaf2ff;
+    --muted: #b6c9e6;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #041120, #071a2f);
+    color: var(--text);
+}
+
+header {
+    padding: 50px 20px;
+    text-align: center;
+    background: linear-gradient(135deg, #071a2f, #0b2a4a);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 38px;
+}
+
+header p {
+    margin-top: 10px;
+    color: var(--muted);
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 30px 20px;
+}
+
+.disclaimer {
+    background: #102e4a;
+    border-left: 5px solid #ff9800;
+    padding: 18px;
+    border-radius: 10px;
+    margin-bottom: 35px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.card {
+    background: linear-gradient(160deg, #0f2a44, #0b2238);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+}
+
+.card img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 22px;
+}
+
+.card h2 {
+    margin-top: 0;
+    color: var(--primary);
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.low { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+.medium { background: rgba(241, 196, 15, 0.15); color: #f1c40f; }
+.high { background: rgba(231, 76, 60, 0.2); color: #ff7675; }
+
+ul {
+    padding-left: 18px;
+}
+
+ul li {
+    margin-bottom: 8px;
+}
+
+.footer {
+    margin-top: 60px;
+    padding: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌿🩺 HOME REMEDIES</h1>
+    <p>AI-based awareness & supportive guidance</p>
+</header>
+
+<div class="container">
+
+<div class="disclaimer">
+<strong>⚠ Medical Disclaimer:</strong><br>
+This information is for awareness only.
+<b>Cancerous skin diseases require immediate dermatologist consultation.</b>
+</div>
+
+<div class="grid">
+
+<!-- 1. Actinic Keratoses -->
+<div class="card">
+<img src="/static/images/actinicKeratosis.jpeg" alt="Actinic Keratosis">
+<div class="card-content">
+<span class="badge medium">Pre-Cancerous</span>
+<h2>Actinic Keratoses (AKIEC)</h2>
+<ul>
+<li>Avoid direct sunlight</li>
+<li>Use SPF 50+ sunscreen daily</li>
+<li>Wear protective clothing</li>
+<li>Consult dermatologist</li>
+</ul>
+</div>
+</div>
+
+<!-- 2. Basal Cell Carcinoma -->
+<div class="card">
+<img src="/static/images/carcinoma.jpeg" alt="Basal Cell Carcinoma">
+<div class="card-content">
+<span class="badge high">Cancerous</span>
+<h2>Basal Cell Carcinoma (BCC)</h2>
+<ul>
+<li>❌ No home remedies</li>
+<li>Immediate medical treatment required</li>
+<li>Early diagnosis prevents spread</li>
+</ul>
+</div>
+</div>
+
+<!-- 3. Benign Keratosis -->
+<div class="card">
+<img src="/static/images/keratosis.jpeg" alt="Benign Keratosis">
+<div class="card-content">
+<span class="badge low">Benign</span>
+<h2>Benign Keratosis (BKL)</h2>
+<ul>
+<li>Maintain proper skin hygiene</li>
+<li>Use mild moisturizer</li>
+<li>Avoid scratching lesions</li>
+</ul>
+</div>
+</div>
+
+<!-- 4. Dermatofibroma -->
+<div class="card">
+<img src="/static/images/dermatofibroma.jpeg" alt="Dermatofibroma">
+<div class="card-content">
+<span class="badge low">Benign</span>
+<h2>Dermatofibroma (DF)</h2>
+<ul>
+<li>Usually harmless</li>
+<li>Avoid repeated skin injury</li>
+<li>Consult doctor if painful</li>
+</ul>
+</div>
+</div>
+
+<!-- 5. Melanoma -->
+<div class="card">
+<img src="/static/images/melanoma.jpeg" alt="Melanoma">
+<div class="card-content">
+<span class="badge high">Very Dangerous</span>
+<h2>Melanoma (MEL)</h2>
+<ul>
+<li>❌ NO home remedies</li>
+<li>Immediate dermatologist consultation</li>
+<li>Early detection saves life</li>
+</ul>
+</div>
+</div>
+
+<!-- 6. Melanocytic Nevus -->
+<div class="card">
+<img src="/static/images/melanocytic.jpeg" alt="Melanocytic Nevus">
+<div class="card-content">
+<span class="badge low">Common Mole</span>
+<h2>Melanocytic Nevus (NV)</h2>
+<ul>
+<li>Monitor size and color</li>
+<li>Use sunscreen regularly</li>
+<li>Consult if changes occur</li>
+</ul>
+</div>
+</div>
+
+<!-- 7. Vascular Lesion -->
+<div class="card">
+<img src="/static/images/vascular.jpeg" alt="Vascular Lesion">
+<div class="card-content">
+<span class="badge low">Benign</span>
+<h2>Vascular Lesion (VASC)</h2>
+<ul>
+<li>Usually harmless</li>
+<li>Avoid skin injury</li>
+<li>Consult doctor for cosmetic concern</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div class="footer">
+© 2026 Snehdip SkinCare | HAM10000 AI Awareness
+</div>
+
+</div>
+
+</body>
+</html>

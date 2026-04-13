@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Doctor | Snehdip SkinCare</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #42a5f5, #ff4081);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .doctor-selector {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .doctor-selector select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .doctor-selector select:focus {
+            border-color: #42a5f5;
+        }
+
+        .doctor-selector select:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.patient {
+            background: #e3f2fd;
+            color: #1976d2;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.doctor {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system {
+            background: #fff3e0;
+            color: #f57c00;
+            align-self: center;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input input:focus {
+            border-color: #42a5f5;
+        }
+
+        .chat-input button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #42a5f5, #ff4081);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .chat-input button:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-input button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .login-prompt {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .login-prompt button {
+            padding: 15px 30px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .login-prompt button:hover {
+            background: #d32f2f;
+        }
+
+        .status-indicator {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .status-indicator.connected {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .status-indicator.disconnected {
+            color: #f44336;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-info {
+            padding: 15px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: white;
+        }
+
+        .role-badge.patient {
+            background: #42a5f5;
+        }
+
+        .role-badge.doctor {
+            background: #ff4081;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            🏥 Snehdip SkinCare - Doctor-Patient Chat
+        </div>
+
+        <div id="loginPrompt" class="login-prompt">
+            <h3>Please login to access chat</h3>
+            <p>You need to be logged in to chat with doctors</p>
+            <button onclick="window.location.href='/login'">Login to Continue</button>
+        </div>
+
+        <div id="chatInterface" style="display: none;">
+            <div class="doctor-selector">
+                <label for="doctorSelect">Select a doctor:</label><br><br>
+                <select id="doctorSelect" disabled>
+                    <option value="">-- Loading doctors... --</option>
+                </select>
+            </div>
+
+            <div class="user-info">
+                <div>
+                    <span id="userName">Loading...</span>
+                    <span id="userRole" class="role-badge">Unknown</span>
+                </div>
+                <div class="status-indicator" id="status">
+                    🔴 Connecting...
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message system">
+                    Welcome to Snehdip SkinCare chat! Please select a doctor to start chatting.
+                </div>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Type your message..." disabled>
+                <button id="sendBtn" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://127.0.0.1:5000';
+        let socket = null;
+        let currentUser = null;
+        let currentRole = null;
+        let currentRoom = null;
+        let selectedDoctorId = null;
+        let isConnected = false;
+        let authToken = null;
+
+        // DOM Elements
+        const loginPrompt = document.getElementById('loginPrompt');
+        const chatInterface = document.getElementById('chatInterface');
+        const doctorSelect = document.getElementById('doctorSelect');
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusEl = document.getElementById('status');
+        const userNameEl = document.getElementById('userName');
+        const userRoleEl = document.getElementById('userRole');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthentication();
+        });
+
+        // Authentication Check
+        function checkAuthentication() {
+            // For now, show chat interface directly and load doctors
+            // We'll handle authentication on the backend
+            loginPrompt.style.display = 'none';
+            chatInterface.style.display = 'block';
+
+            // Set default user info (you can modify this based on your session)
+            currentUser = 'Patient';
+            currentRole = 'patient';
+
+            userNameEl.textContent = currentUser;
+            userRoleEl.textContent = 'Patient';
+            userRoleEl.className = `role-badge patient`;
+
+            // Load doctors immediately
+            loadDoctors();
+        }
+
+        // Load Doctors
+        async function loadDoctors() {
+            try {
+                // Use the new public API endpoint that doesn't require authentication
+                const response = await fetch(`${API_BASE}/api/public/doctors`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    populateDoctorDropdown(data.doctors);
+                } else {
+                    console.error('Failed to load doctors');
+                    // Fallback: show some default doctors
+                    populateDoctorDropdown([
+                        {id: 1, username: 'Dr. Smith', name: 'Dr. Smith'},
+                        {id: 2, username: 'Dr. Johnson', name: 'Dr. Johnson'},
+                        {id: 3, username: 'Dr. Williams', name: 'Dr. Williams'}
+                    ]);
+                }
+            } catch (error) {
+                console.error('Error loading doctors:', error);
+                // Fallback: show some default doctors
+                populateDoctorDropdown([
+                    {id: 1, username: 'Dr. Smith', name: 'Dr. Smith'},
+                    {id: 2, username: 'Dr. Johnson', name: 'Dr. Johnson'},
+                    {id: 3, username: 'Dr. Williams', name: 'Dr. Williams'}
+                ]);
+            }
+        }
+
+        // Populate Doctor Dropdown
+        function populateDoctorDropdown(doctors) {
+            doctorSelect.innerHTML = '<option value="">-- Select a doctor --</option>';
+
+            doctors.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.id;
+                // Show doctor name if available, otherwise username
+                option.textContent = doctor.name || doctor.username;
+                doctorSelect.appendChild(option);
+            });
+
+            doctorSelect.disabled = false;
+
+            // Add change event listener
+            doctorSelect.addEventListener('change', (e) => {
+                selectedDoctorId = e.target.value;
+                if (selectedDoctorId) {
+                    initializeChat();
+                } else {
+                    disableChat();
+                    showMessage('system', 'Please select a doctor to start chatting.');
+                }
+            });
+        }
+
+        // Initialize Chat
+        function initializeChat() {
+            if (!selectedDoctorId) return;
+
+            showMessage('system', `Connecting to doctor...`);
+            initializeSocket();
+        }
+
+        // Socket.IO Connection
+        function initializeSocket() {
+            socket = io(API_BASE);
+
+            socket.on('connect', () => {
+                isConnected = true;
+                updateStatus('🟢 Connected', 'connected');
+                enableChat(true);
+                showMessage('system', 'Connected! You can now send messages.');
+
+                // Join room with doctor
+                currentRoom = `chat_${selectedDoctorId}_${currentUser}`;
+                socket.emit('join', {
+                    room: currentRoom,
+                    user: currentUser,
+                    role: currentRole
+                });
+            });
+
+            socket.on('disconnect', () => {
+                isConnected = false;
+                updateStatus('🔴 Disconnected', 'disconnected');
+                enableChat(false);
+                showMessage('system', 'Lost connection to server...');
+            });
+
+            socket.on('new_message', (data) => {
+                showMessage(data.sender || 'unknown', data.message, data.timestamp);
+            });
+
+            socket.on('system_message', (data) => {
+                showMessage('system', data.message);
+            });
+        }
+
+        // Message Sending
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || !isConnected || !selectedDoctorId) return;
+
+            const messageData = {
+                room: currentRoom,
+                sender: currentRole,
+                message: message,
+                user: currentUser,
+                timestamp: new Date().toISOString()
+            };
+
+            socket.emit('message', messageData);
+            showMessage(currentRole, message, messageData.timestamp);
+            messageInput.value = '';
+
+            // Also save to database via API
+            saveMessageToDB(message, selectedDoctorId);
+        }
+
+        // Save Message to Database
+        async function saveMessageToDB(message, receiverId) {
+            try {
+                await fetch(`${API_BASE}/api/chat/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        receiverId: parseInt(receiverId),
+                        senderRole: currentRole
+                    })
+                });
+            } catch (error) {
+                console.error('Failed to save message to database:', error);
+            }
+        }
+
+        // UI Functions
+        function showMessage(sender, content, timestamp) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const time = timestamp ? new Date(timestamp).toLocaleTimeString() : '';
+            const senderName = sender === currentRole ? 'You' : (sender.charAt(0).toUpperCase() + sender.slice(1));
+
+            if (sender === 'system') {
+                messageDiv.textContent = content;
+            } else {
+                messageDiv.innerHTML = `
+                    <strong>${senderName}:</strong> ${content}
+                    ${time ? `<br><small>${time}</small>` : ''}
+                `;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function updateStatus(text, className) {
+            statusEl.textContent = text;
+            statusEl.className = `status-indicator ${className}`;
+        }
+
+        function enableChat(enabled) {
+            messageInput.disabled = !enabled;
+            sendBtn.disabled = !enabled;
+        }
+
+        function disableChat() {
+            enableChat(false);
+        }
+
+        // Event Listeners
+        sendBtn.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Allow Doctor - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+        body{
+            background:url("/static/images/upload.jpeg") no-repeat center center fixed;
+            background-size:cover;
+            min-height:100vh;
+            display:flex;
+        }
+
+        /* Chat Container */
+        .chat-container{
+            width:900px;
+            margin:0 auto;
+            height:100vh;
+            background:rgba(255,255,255,0.15);
+            backdrop-filter:blur(15px);
+            box-shadow:0 8px 30px rgba(0,0,0,0.3);
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+        }
+
+        /* Chat Header */
+        .chat-header{
+            background:linear-gradient(135deg,#42a5f5,#ff4081);
+            color:#fff;
+            padding:20px;
+            text-align:center;
+            font-weight:600;
+            font-size:18px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            border-radius:20px 20px 0 0;
+            box-shadow:0 4px 15px rgba(79,172,254,0.3);
+        }
+
+        /* User Selection */
+        .user-selection{
+            background:rgba(255,255,255,0.15);
+            padding:25px;
+            border-bottom:1px solid rgba(255,255,255,0.3);
+            border-radius:0 0 20px 20px;
+        }
+
+        /* User Select */
+        .user-select{
+            width:100%;
+            padding:15px 20px;
+            border:2px solid rgba(255,255,255,0.3);
+            border-radius:12px;
+            font-size:16px;
+            background:rgba(255,255,255,0.15);
+            color:#fff;
+            transition:all 0.3s ease;
+            box-shadow:0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .user-select:hover{
+            border-color:linear-gradient(135deg,#42a5f5,#ff4081);
+            box-shadow:0 8px 16px rgba(79,172,254,0.15);
+            transform:translateY(-2px);
+        }
+
+        .user-select:focus{
+            outline:none;
+            border-color:linear-gradient(135deg,#42a5f5,#ff4081);
+            box-shadow:0 0 0 3px rgba(79,172,254,0.3);
+        }
+
+        /* Chat Messages */
+        .chat-messages{
+            flex:1;
+            padding:30px;
+            overflow-y:auto;
+            background:rgba(255,255,255,0.15);
+            scroll-behavior:smooth;
+        }
+
+        /* Doctor List */
+        .doctor-list{
+            display:flex;
+            flex-direction:column;
+            gap:15px;
+        }
+
+        .doctor-item{
+            background:rgba(255,255,255,0.15);
+            border:1px solid rgba(255,255,255,0.3);
+            border-radius:12px;
+            padding:20px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            transition:all 0.3s ease;
+        }
+
+        .doctor-info{
+            flex:1;
+        }
+
+        .doctor-name{
+            font-size:18px;
+            font-weight:600;
+            color:#fff;
+            margin-bottom:5px;
+        }
+
+        .doctor-email{
+            font-size:14px;
+            color:rgba(255,255,255,0.8);
+            margin-bottom:5px;
+        }
+
+        .doctor-date{
+            font-size:12px;
+            color:rgba(255,255,255,0.6);
+        }
+
+        .doctor-actions{
+            display:flex;
+            gap:10px;
+        }
+
+        .btn{
+            padding:10px 20px;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+            font-weight:600;
+            font-size:14px;
+            transition:all 0.3s ease;
+            text-decoration:none;
+        }
+
+        .btn-approve{
+            background:linear-gradient(135deg,#42a5f5,#ff4081);
+            color:#fff;
+            box-shadow:0 4px 15px rgba(79,172,254,0.3);
+        }
+
+        .btn-approve:hover{
+            transform:translateY(-2px);
+            box-shadow:0 8px 25px rgba(79,172,254,0.4);
+        }
+
+        .btn-reject{
+            background:linear-gradient(135deg,#f87171,#dc2626);
+            color:#fff;
+            box-shadow:0 4px 15px rgba(248,113,113,0.3);
+        }
+
+        .btn-reject:hover{
+            transform:translateY(-2px);
+            box-shadow:0 8px 25px rgba(248,113,113,0.4);
+        }
+
+        .loading{
+            text-align:center;
+            padding:40px;
+            color:rgba(255,255,255,0.7);
+            font-size:16px;
+        }
+
+        .error-message{
+            background:linear-gradient(135deg,#fecaca,#f87171);
+            color:rgba(255,255,255,0.7);
+            padding:20px;
+            border-radius:12px;
+            text-align:center;
+            margin:20px;
+            font-weight:500;
+            box-shadow:0 4px 15px rgba(248,113,113,0.2);
+        }
+
+        .empty-state{
+            text-align:center;
+            padding:60px 20px;
+            color:rgba(255,255,255,0.7);
+            font-size:16px;
+            background:rgba(255,255,255,0.15);
+            border-radius:15px;
+            margin:20px;
+            border:2px dashed rgba(255,255,255,0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width:768px){
+            .chat-container{
+                margin:0;
+                border-radius:0;
+                height:100vh;
+            }
+
+            .chat-header{
+                border-radius:0;
+                padding:15px;
+                font-size:16px;
+            }
+
+            .user-selection{
+                padding:15px;
+                border-radius:0;
+            }
+
+            .chat-messages{
+                padding:20px;
+            }
+
+            .doctor-actions{
+                flex-direction:column;
+                gap:5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <span>Doctor Approval Management</span>
+        </div>
+
+        <div class="user-selection">
+            <div id="loadingMessage" class="loading">Loading pending doctors...</div>
+            <div id="doctorList" class="doctor-list" style="display: none;"></div>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                No pending doctor approvals found.
+            </div>
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Get current user from JWT token
+        function getCurrentUserFromToken() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No token found in localStorage');
+                return null;
+            }
+
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return {
+                    id: payload.user_id,
+                    role: payload.role,
+                    is_admin: payload.is_admin
+                };
+            } catch (error) {
+                console.error('Error parsing token:', error);
+                return null;
+            }
+        }
+
+        // Fetch JWT token from server and store in localStorage
+        async function fetchAndStoreToken() {
+            try {
+                const response = await fetch('/api/token');
+                const data = await response.json();
+
+                if (data.success && data.token) {
+                    localStorage.setItem('token', data.token);
+                    console.log('JWT token fetched and stored');
+                    return true;
+                } else {
+                    console.error('Failed to fetch token:', data.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error fetching token:', error);
+                return false;
+            }
+        }
+
+        // Load pending doctors
+        async function loadPendingDoctors() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showError('Please login first');
+                    return;
+                }
+
+                console.log('Loading pending doctors...');
+                const response = await fetch('/api/admin/pending-doctors', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Pending doctors response:', data);
+
+                if (data.success) {
+                    displayDoctors(data.doctors);
+                } else {
+                    showError(data.error || 'Failed to load pending doctors');
+                }
+            } catch (error) {
+                console.error('Error loading pending doctors:', error);
+                showError('Error loading pending doctors. Please check your connection.');
+            }
+        }
+
+        // Display doctors
+        function displayDoctors(doctors) {
+            const doctorList = document.getElementById('doctorList');
+            const emptyState = document.getElementById('emptyState');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Hide loading and error
+            loadingMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            if (doctors.length === 0) {
+                doctorList.style.display = 'none';
+                emptyState.style.display = 'block';
+            } else {
+                doctorList.style.display = 'flex';
+                emptyState.style.display = 'none';
+
+                doctorList.innerHTML = doctors.map(doctor => `
+                    <div class="doctor-item">
+                        <div class="doctor-info">
+                            <div class="doctor-name">${doctor.username}</div>
+                            <div class="doctor-email">${doctor.email}</div>
+                            <div class="doctor-date">Registered: ${new Date(doctor.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <div class="doctor-actions">
+                            <button class="btn btn-approve" onclick="approveDoctor(${doctor.id})">
+                                Approve
+                            </button>
+                            <button class="btn btn-reject" onclick="rejectDoctor(${doctor.id})">
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Approve doctor
+        async function approveDoctor(doctorId) {
+            if (!confirm('Are you sure you want to approve this doctor?')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/admin/approve-doctor/${doctorId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Approve response:', data);
+
+                if (data.success) {
+                    alert(data.message);
+                    loadPendingDoctors(); // Reload the list
+                } else {
+                    alert(data.error || 'Failed to approve doctor');
+                }
+            } catch (error) {
+                console.error('Error approving doctor:', error);
+                alert('Error approving doctor. Please try again.');
+            }
+        }
+
+        // Reject doctor
+        async function rejectDoctor(doctorId) {
+            if (!confirm('Are you sure you want to reject this doctor? This will delete their account.')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/admin/reject-doctor/${doctorId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Reject response:', data);
+
+                if (data.success) {
+                    alert(data.message);
+                    loadPendingDoctors(); // Reload the list
+                } else {
+                    alert(data.error || 'Failed to reject doctor');
+                }
+            } catch (error) {
+                console.error('Error rejecting doctor:', error);
+                alert('Error rejecting doctor. Please try again.');
+            }
+        }
+
+        // Show error
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const doctorList = document.getElementById('doctorList');
+            const emptyState = document.getElementById('emptyState');
+
+            loadingMessage.style.display = 'none';
+            doctorList.style.display = 'none';
+            emptyState.style.display = 'none';
+            errorMessage.style.display = 'block';
+            errorMessage.textContent = message;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Initializing admin approval page...');
+
+            // First, fetch and store JWT token from server
+            const tokenFetched = await fetchAndStoreToken();
+
+            if (tokenFetched) {
+                currentUser = getCurrentUserFromToken();
+                console.log('Current user:', currentUser);
+
+                if (currentUser && currentUser.is_admin) {
+                    loadPendingDoctors();
+                } else {
+                    showError('Admin access required');
+                }
+            } else {
+                showError('Please login to access admin panel');
+            }
+        });
+    </script>
+</body>
+</html>

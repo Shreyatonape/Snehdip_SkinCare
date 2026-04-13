@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Doctor Appointments</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+body { font-family: 'Poppins', sans-serif; background: #f4f7ff; padding: 20px; }
+h1 { text-align: center; margin-bottom: 20px; }
+table { width: 100%; max-width: 1000px; margin: auto; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+th, td { padding: 12px; border: 1px solid #ddd; text-align: center; }
+th { background: #4b7bec; color: white; }
+tr:nth-child(even) { background: #f2f2f2; }
+button { padding: 6px 12px; margin: 2px; border: none; border-radius: 5px; cursor: pointer; }
+button.approve { background: #28a745; color: white; }
+button.reject { background: #dc3545; color: white; }
+</style>
+</head>
+
+<body>
+
+<h1>Doctor Appointments</h1>
+
+<table>
+<thead>
+<tr>
+    <th>Patient</th>
+    <th>Date</th>
+    <th>Time</th>
+    <th>Issue</th>
+    <th>Status</th>
+    <th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="apptBody">
+<tr><td colspan="6">Loading...</td></tr>
+</tbody>
+</table>
+
+<script>
+const token = localStorage.getItem("token");
+const role = localStorage.getItem("role");
+
+// Redirect if not logged in or not doctor
+if (!token || role !== "doctor") {
+    alert("Only doctors can access this page!");
+    window.location.href = "login.html";
+}
+
+function fetchAppointments() {
+    fetch("http://localhost:5000/api/appointments", {
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+    })
+    .then(res => res.json())
+    .then(data => {
+        const body = document.getElementById("apptBody");
+        body.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            body.innerHTML = `<tr><td colspan="6">No appointments</td></tr>`;
+            return;
+        }
+
+        data.forEach(a => {
+            body.innerHTML += `
+                <tr id="row-${a._id}">
+                    <td>${a.patientName}</td>
+                    <td>${new Date(a.date).toLocaleDateString()}</td>
+                    <td>${a.time}</td>
+                    <td>${a.issue}</td>
+                    <td id="status-${a._id}">${a.status || "Pending"}</td>
+                    <td>
+                        <button class="approve" onclick="updateStatus('${a._id}','Approved')">✅ Approve</button>
+                        <button class="reject" onclick="updateStatus('${a._id}','Rejected')">❌ Reject</button>
+                    </td>
+                </tr>
+            `;
+        });
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById("apptBody").innerHTML =
+            `<tr><td colspan="6">Failed to load appointments</td></tr>`;
+    });
+}
+
+function updateStatus(appointmentId, status) {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please login first");
+    return;
+  }
+
+    fetch(`http://localhost:5000/doctor/update-appointment-status/${appointmentId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Failed to update status");
+        return res.json();
+    })
+     .then(data => {
+    alert("Status updated successfully!");
+    location.reload(); // table refresh
+  })
+  .catch(err => {
+    console.error(err);
+    alert("❌ Error updating status: " + err.message);
+  });
+}
+
+// Initial load
+fetchAppointments();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snehdeep SkinCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
+    body {
+      background: linear-gradient(to bottom, #0d1b2a, #1b263b),
+      url("{{ url_for('static', filename='images/Hospital.jpeg') }}") no-repeat center top/cover;
+      background-attachment: fixed;
+      background-blend-mode: overlay;
+      overflow-x: hidden;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(79, 172, 254, 0.25);
+      z-index: -1;
+    }
+
+    header.nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(10, 10, 15, 0.75);
+      backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 40px;
+      z-index: 1000;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    header.nav .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    header.nav .brand span {
+      background: linear-gradient(45deg, #00f2fe, #4facfe, #ff6ec4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header.nav .brand .logo {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    header.nav nav a {
+      margin: 0 12px;
+      text-decoration: none;
+      color: #eaeaea;
+      font-weight: 500;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      padding: 8px 14px;
+      border-radius: 25px;
+    }
+
+    header.nav nav a:hover,
+    header.nav nav a.active {
+      background: linear-gradient(135deg, #00f2fe, #4facfe, #ff6ec4);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    /* Language Dropdown Styles */
+    .language-dropdown {
+      position: relative;
+      display: inline-block;
+      margin-left: 20px;
+      z-index: 1001;
+    }
+
+    .dropdown-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: #eaeaea;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .dropdown-btn:hover {
+      background: linear-gradient(135deg, #00f2fe, #4facfe, #ff6ec4);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background: rgba(10, 10, 15, 0.95);
+      min-width: 140px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+      z-index: 1002;
+      border-radius: 10px;
+      backdrop-filter: blur(15px);
+      right: 0;
+      top: 100%;
+      margin-top: 5px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .dropdown-content a {
+      color: #eaeaea;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .dropdown-content a:hover {
+      background: linear-gradient(135deg, #00f2fe, #4facfe, #ff6ec4);
+      color: #fff;
+    }
+
+    .dropdown-content a:first-child {
+      border-radius: 10px 10px 0 0;
+    }
+
+    .dropdown-content a:last-child {
+      border-radius: 0 0 10px 10px;
+    }
+
+    .language-dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    /* Alternative click-based dropdown */
+    .language-dropdown.active .dropdown-content {
+      display: block;
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 140px 80px 80px;
+      gap: 50px;
+      min-height: 90vh;
+      color: #fff;
+      position: relative;
+      background: url("{{ url_for('static', filename='images/index.jpg') }}") no-repeat center/cover;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.05);
+      z-index: 0;
+    }
+
+    .hero-left {
+      flex: 1;
+      z-index: 1;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .hero-left h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .hero-left h1 span {
+      background: linear-gradient(45deg, #00f2fe, #4facfe, #ff6ec4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-left p {
+      font-size: 1.15rem;
+      margin-bottom: 30px;
+      color: #f0f0f0;
+      line-height: 1.6;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 15px 40px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #00f2fe, #4facfe, #ff6ec4);
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.35s ease;
+      box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
+    }
+
+    .btn:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 10px 30px rgba(255, 110, 196, 0.6);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      padding: 60px 80px;
+    }
+
+    .card {
+      background: linear-gradient(135deg,#989ea7,#989ea7);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      color: #e0e0e0;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.45);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 30px rgba(79, 172, 254, 0.65);
+    }
+
+    .card img {
+      width: 300px;
+      height: 300px;
+      margin-bottom: 20px;
+      object-fit: contain;
+      border-radius: 15px;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover img {
+      transform: scale(1.1);
+    }
+
+    .card h3 {
+      margin-bottom: 12px;
+      font-size: 1.4rem;
+      color: #0f0a0d;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: #f1f1f1;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: rgba(10, 10, 15, 0.85);
+      color: #bdbdbd;
+      font-size: 0.9rem;
+      margin-top: 50px;
+    }
+
+    footer span {
+      background: linear-gradient(45deg, #00f2fe, #4facfe, #ff6ec4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 600;
+    }
+
+    @keyframes fadeInUp {
+      from {transform: translateY(40px);opacity: 0;}
+      to {transform: translateY(0);opacity: 1;}
+    }
+
+    @media(max-width:1024px){
+      .hero {
+        flex-direction: column-reverse;
+        padding: 140px 40px 60px;
+      }
+
+      .hero-right {
+        width: 80%;
+      }
+    }
+
+    @media(max-width:600px){
+      header.nav {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px 20px;
+      }
+
+      .features {
+        padding: 40px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="brand">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+    Snehdip <span>SkinCare</span>
+  </div>
+
+  <nav>
+    <a href="{{ url_for('index_view') }}" class="active">{{ translate('home') }}</a>
+    <a href="{{ url_for('register') }}" class="btn">{{ translate('register') }}</a>
+    <a href="{{ url_for('login_view') }}">{{ translate('login') }}</a>
+    <a href="{{ url_for('hospitals_view') }}">{{ translate('hospitals') }}</a>
+    <a href="{{ url_for('about_view') }}">{{ translate('about') }}</a>
+
+    <!-- Language Dropdown -->
+    <div class="language-dropdown" id="languageDropdown">
+      <button class="dropdown-btn" onclick="toggleDropdown()">{{ translate('select_language') }} ▼</button>
+      <div class="dropdown-content">
+        <a href="{{ url_for('set_language_route', lang='en') }}">{{ translate('english') }}</a>
+        <a href="{{ url_for('set_language_route', lang='hi') }}">{{ translate('hindi') }}</a>
+        <a href="{{ url_for('set_language_route', lang='mr') }}">{{ translate('marathi') }}</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main class="hero">
+  <div class="hero-left">
+    <h1>{{ translate('skin_disease_detection') }}</h1>
+    <p>
+      {{ translate('welcome') }}! {{ translate('upload_skin_image') }}.<br>
+      {{ translate('diagnosis_result') }}, {{ translate('treatment') }}, and {{ translate('prevention') }} — all in one place.
+    </p>
+    <a href="{{ url_for('register') }}" class="btn">{{ translate('get_started') }}</a>
+  </div>
+</main>
+
+<section class="features">
+  <div class="card">
+    <img src="{{ url_for('static', filename='images/AI_sckin.webp') }}" alt="AI Detection">
+    <h3>{{ translate('ai_detection') }}</h3>
+    <p>{{ translate('ai_detection_description') }}</p>
+  </div>
+
+  <div class="card">
+    <img src="{{ url_for('static', filename='images/treatment.png') }}" alt="Treatment">
+    <h3>{{ translate('treatment_suggestions') }}</h3>
+    <p>{{ translate('treatment_description') }}</p>
+  </div>
+
+  <div class="card">
+    <img src="{{ url_for('static', filename='images/Remedies.png') }}" alt="Remedies">
+    <h3>{{ translate('home_remedies') }}</h3>
+    <p>{{ translate('home_remedies_description') }}</p>
+  </div>
+</section>
+
+<footer>
+  © 2025 <span>Snehdip SkinCare</span>. All rights reserved.
+</footer>
+
+<script>
+function toggleDropdown() {
+  const dropdown = document.getElementById('languageDropdown');
+  dropdown.classList.toggle('active');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+  const dropdown = document.getElementById('languageDropdown');
+  const dropdownBtn = dropdown.querySelector('.dropdown-btn');
+
+  if (!dropdown.contains(event.target)) {
+    dropdown.classList.remove('active');
+  }
+});
+
+// Close dropdown when a language link is clicked
+document.querySelectorAll('.dropdown-content a').forEach(link => {
+  link.addEventListener('click', function() {
+    document.getElementById('languageDropdown').classList.remove('active');
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="refresh" content="30">
+
+<title>Appointment Queue | Snehdip SkinCare</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{
+    background-color:#0b1d2d;
+    min-height:100vh;
+    display:flex;
+}
+
+/* Sidebar (same as dashboard) */
+.sidebar{
+    width:260px;
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(15px);
+    padding:30px 20px;
+    height:100vh;
+    box-shadow:5px 0 25px rgba(0,0,0,0.2);
+    display:flex;
+    flex-direction:column;
+}
+.sidebar h2{
+    color:#fff;
+    font-weight:700;
+    margin-bottom:30px;
+    text-align:center;
+}
+.sidebar h2 span{
+    background:linear-gradient(45deg,#42a5f5,#ff4081);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+.sidebar a{
+    text-decoration:none;
+    margin:10px 0;
+    padding:12px 18px;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:500;
+    color:#fff;
+    transition:0.3s;
+}
+.sidebar a:hover{
+    background:linear-gradient(135deg,#42a5f5,#ff4081);
+}
+
+/* Main */
+.main{
+    flex:1;
+    padding:40px;
+    color:#fff;
+}
+
+.page-title{
+    font-size:30px;
+    margin-bottom:25px;
+}
+
+/* Queue Cards */
+.queue-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:25px;
+}
+
+.queue-card{
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.3);
+    animation:fadeIn 0.4s ease;
+}
+
+.queue-card h3{
+    font-size:20px;
+    margin-bottom:10px;
+}
+
+.queue-card p{
+    font-size:15px;
+    opacity:0.95;
+    margin-bottom:8px;
+}
+
+.queue-info{
+    margin-top:15px;
+    padding:12px;
+    border-radius:12px;
+    background:linear-gradient(135deg,#42a5f5,#ff4081);
+    font-weight:600;
+    text-align:center;
+}
+
+@keyframes fadeIn{
+    from{opacity:0;transform:translateY(10px);}
+    to{opacity:1;transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<!-- Main Content -->
+<div class="main">
+    <div class="page-title">📋 Appointment Queue</div>
+
+    <div class="queue-grid">
+        {% if appointments %}
+            {% for appointment in appointments %}
+            <div class="queue-card">
+                <h3>🩺 Doctor: {{ appointment.doctor_name }}</h3>
+                <p>📅 Date: {{ appointment.date }}</p>
+                <p>⏰ Time: {{ appointment.time }}</p>
+
+                <!-- Status Badge -->
+                <p>📌 Status:
+                    {% if appointment.status == 'Pending' %}
+                        <span style="color: #facc15; font-weight: 600;">⏳ {{ appointment.status }}</span>
+                    {% elif appointment.status == 'Completed' %}
+                        <span style="color: #22c55e; font-weight: 600;">✅ {{ appointment.status }}</span>
+                        {% if appointment.completed_at %}
+                            <br><small style="opacity: 0.8;">Completed: {{ appointment.completed_at }}</small>
+                        {% endif %}
+                    {% elif appointment.status == 'Rejected' %}
+                        <span style="color: #ef4444; font-weight: 600;">❌ {{ appointment.status }}</span>
+                        {% if appointment.reject_reason %}
+                            <br><small style="opacity: 0.8;">Reason: {{ appointment.reject_reason }}</small>
+                        {% endif %}
+                    {% else %}
+                        <span>{{ appointment.status }}</span>
+                    {% endif %}
+                </p>
+
+                <!-- Queue Position (only for pending appointments) -->
+                {% if appointment.status == 'Pending' %}
+                <div class="queue-info" id="queue-{{ appointment.id }}">
+                    Checking queue...
+                </div>
+                {% else %}
+                <div class="queue-info" style="background: rgba(255,255,255,0.1);">
+                    {% if appointment.status == 'Completed' %}
+                        🎉 Appointment completed successfully
+                    {% elif appointment.status == 'Rejected' %}
+                        📝 Appointment {{ appointment.reject_reason|lower if appointment.reject_reason else 'rejected' }}
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="queue-card" style="text-align: center; opacity: 0.7;">
+                <h3>No appointments found</h3>
+                <p>You don't have any appointments yet.</p>
+                <p><a href="{{ url_for('contact_view') }}" style="color: #42a5f5;">Book an appointment</a></p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+const appointments = JSON.parse('{{ appointments | tojson | safe }}');
+
+// Debug: Log appointments data
+console.log('DEBUG: Appointments data:', appointments);
+console.log('DEBUG: Appointments count:', appointments.length);
+
+appointments.forEach(app => {
+    // Only fetch queue position for pending appointments
+    if (app.status === 'Pending') {
+        fetch(`/api/appointment/queue/${app.id}`)
+            .then(res => res.json())
+            .then(data => {
+                const queueElement = document.getElementById(`queue-${app.id}`);
+                if (queueElement) {
+                    queueElement.innerText =
+                        `👥 Patients before you: ${data.patients_before} | 📍 Position: ${data.your_position}`;
+                }
+            })
+            .catch(() => {
+                const queueElement = document.getElementById(`queue-${app.id}`);
+                if (queueElement) {
+                    queueElement.innerText = "Queue unavailable";
+                }
+            });
+    }
+});
+</script>
+
+</body>
+</html>

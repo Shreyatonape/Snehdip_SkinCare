@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ translate('upload') }} | Snehdip SkinCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
+    body {
+      background: url("{{ url_for('static', filename='images/upload.jpeg') }}") no-repeat center center/cover;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: -1;
+    }
+
+    /* Navbar */
+    header.nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(15, 15, 15, 0.6);
+      backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 40px;
+      z-index: 1000;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    header.nav .brand {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    header.nav .brand span {
+      background: linear-gradient(45deg, #42a5f5, #ff4081);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header.nav nav a {
+      margin: 0 12px;
+      text-decoration: none;
+      color: #f5f5f5;
+      font-weight: 500;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      padding: 8px 14px;
+      border-radius: 25px;
+    }
+
+    header.nav nav a:hover,
+    header.nav nav a.active {
+      background: linear-gradient(135deg, #42a5f5, #ff4081);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Upload Card */
+    .upload-card {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 50px;
+      border-radius: 25px;
+      backdrop-filter: blur(25px);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+      max-width: 700px;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      text-align: center;
+      margin-top: 120px;
+      animation: fadeInUp 1s ease-out;
+      flex: 1;
+    }
+
+    .upload-card h2 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .upload-card .subtitle {
+      font-size: 1.1rem;
+      color: #e0e0e0;
+      margin-bottom: 25px;
+    }
+
+    .file-label {
+      display: inline-block;
+      padding: 14px 25px;
+      border: 2px dashed #42a5f5;
+      border-radius: 15px;
+      color: #fff;
+      cursor: pointer;
+      margin-bottom: 25px;
+      transition: 0.3s ease;
+    }
+
+    .file-label:hover {
+      background: rgba(66, 165, 245, 0.2);
+      border-color: #ff4081;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 35px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #42a5f5, #ff4081);
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.35s ease;
+      box-shadow: 0 6px 20px rgba(66, 165, 245, 0.6);
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 10px 30px rgba(255, 64, 129, 0.6);
+    }
+
+    #preview {margin-top: 20px;color: #fff;}
+    #preview img {max-width: 100%;border-radius: 15px;margin-top: 15px;}
+    #result {margin-top: 20px;}
+
+    @keyframes fadeInUp {
+      from {transform: translateY(40px);opacity: 0;}
+      to {transform: translateY(0);opacity: 1;}
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: rgba(10, 10, 15, 0.85);
+      color: #bdbdbd;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+
+    footer span {
+      background: linear-gradient(45deg, #00f2fe, #4facfe, #ff6ec4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 600;
+    }
+
+    @media(max-width:768px){
+      .upload-card {padding:35px 20px;max-width:95%;}
+      .upload-card h2 {font-size:26px;}
+    }
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="brand">Snehdip <span>SkinCare</span></div>
+  <nav>
+    <a href="{{ url_for('index_view') }}" class="active">{{ translate('home') }}</a>
+    <a href="{{ url_for('register') }}" class="btn">{{ translate('register') }}</a>
+    <a href="{{ url_for('login_view') }}">{{ translate('login') }}</a>
+    <a href="{{ url_for('upload_view') }}" class="active">{{ translate('upload') }}</a>
+    <a href="{{ url_for('hospitals_view') }}">{{ translate('hospitals') }}</a>
+    <a href="{{ url_for('contact_view') }}">{{ translate('contact_doctor') }}</a>
+    <a href="{{ url_for('online_view') }}">{{ translate('buy_medicines') }}</a>
+    <a href="{{ url_for('about_view') }}">{{ translate('about') }}</a>
+  </nav>
+</header>
+
+<div class="upload-card">
+  <h2>📤 {{ translate('upload_your_image') }}</h2>
+  <p class="subtitle">{{ translate('get_instant_ai_analysis') }}</p>
+
+  <label class="file-label" for="file">
+    <input id="file" type="file" accept="image/*" hidden>
+    <span>{{ translate('choose_image') }}</span>
+  </label>
+
+  <br>
+  <button id="btnPredict" class="btn">🔍 {{ translate('predict') }}</button>
+  <div id="preview"></div>
+  <div id="result"></div>
+</div>
+
+<script>
+const btnPredict = document.getElementById("btnPredict");
+const fileInput = document.getElementById("file");
+const resultDiv = document.getElementById("result");
+const previewDiv = document.getElementById("preview");
+
+// Image preview
+fileInput.addEventListener("change", () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    previewDiv.innerHTML = `<img src="${reader.result}" alt="Preview">`;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Predict
+btnPredict.addEventListener("click", async () => {
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("⚠️ {{ translate('please_select_image_first') }}");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  resultDiv.innerHTML = `<p style='color:white'>⏳ {{ translate('predicting') }}...</p>`;
+
+  try {
+    // ✅ IMPORTANT CHANGE:
+    // absolute URL ❌ काढून relative URL वापर
+    const response = await fetch("/api/predict", {
+      method: "POST",
+      body: formData,
+      credentials: "same-origin" // ✅ Flask session compatible
+    });
+
+    // ❌ Server not found / 404 / 500 handle
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "{{ translate('server_error') }}");
+    }
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.error || "{{ translate('prediction_failed') }}");
+    }
+
+    // ✅ Show result
+    resultDiv.innerHTML = `
+      <h3 style="color:white;margin-top:20px;">✅ {{ translate('prediction_result') }}</h3>
+      <p style="color:white;"><b>{{ translate('disease') }}:</b> ${data.disease}</p>
+      <p style="color:white;"><b>{{ translate('confidence') }}:</b> ${Number(data.confidence).toFixed(2)}%</p>
+      <p style="color:white;"><b>{{ translate('risk_level') }}:</b> ${data.risk_level || "{{ translate('low') }}"}</p>
+      <p style="color:white;"><b>{{ translate('reason') }}:</b> ${data.reason || "{{ translate('na') }}"}</p>
+      <p style="color:white;"><b>{{ translate('symptoms') }}:</b> ${data.symptoms || "{{ translate('na') }}"}</p>
+      <p style="color:white;"><b>{{ translate('prevention') }}:</b> ${data.prevention || "{{ translate('na') }}"}</p>
+    `;
+  } catch (error) {
+    console.error("{{ translate('prediction_error') }}:", error);
+    resultDiv.innerHTML = `
+      <p style="color:red;">❌ ${error.message}</p>
+    `;
+  }
+});
+</script>
+
+<footer>
+  © 2025 <span>Snehdip SkinCare</span>. All rights reserved.
+</footer>
+
+</body>
+</html>

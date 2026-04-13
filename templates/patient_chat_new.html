@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Chat{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/whatsapp-simple.css">
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <div class="info">
+            <div class="name" id="chatWith">Select a doctor</div>
+        </div>
+        <div class="actions">
+            <button id="deleteChatBtn" style="display: none;" onclick="deleteChat()">
+                <i class="fas fa-trash"></i> Delete Chat
+            </button>
+        </div>
+    </div>
+
+    <!-- User Selection -->
+    <div class="user-selection">
+        <select class="user-select" id="doctorSelect">
+            <option value="">-- Select Doctor --</option>
+        </select>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="chat-messages" id="chatBox">
+        <div class="empty-chat">
+            <i class="fas fa-comments"></i>
+            <h3>No conversation selected</h3>
+            <p>Select a doctor to start chatting</p>
+        </div>
+    </div>
+
+    <!-- Chat Input -->
+    <div class="chat-input-container">
+        <textarea
+            class="chat-input"
+            id="chatInput"
+            placeholder="Type a message..."
+            rows="1"
+            disabled></textarea>
+        <button class="send-button" id="sendBtn" disabled>
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="delete-modal" id="deleteModal">
+    <div class="delete-modal-content">
+        <h3>Delete Chat History?</h3>
+        <p>This will permanently delete all messages between you and the selected doctor. This action cannot be undone.</p>
+        <div class="delete-modal-buttons">
+            <button class="delete-cancel" onclick="cancelDelete()">Cancel</button>
+            <button class="delete-confirm" onclick="confirmDelete()">Delete Chat</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedDoctorId = null;
+let pollingInterval = null;
+
+const chatBox = document.getElementById("chatBox");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+const chatWith = document.getElementById("chatWith");
+const doctorSelect = document.getElementById("doctorSelect");
+const deleteChatBtn = document.getElementById("deleteChatBtn");
+const deleteModal = document.getElementById("deleteModal");
+
+// Load doctors (only those with appointments)
+async function loadDoctors() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/messages/contacts', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            doctorSelect.innerHTML = '<option value="">-- Select Doctor --</option>';
+            data.contacts.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.id;
+                option.textContent = doctor.name;
+                doctorSelect.appendChild(option);
+            });
+        } else {
+            console.error('Failed to load doctors:', data.error);
+        }
+    } catch (error) {
+        console.error('Error loading doctors:', error);
+    }
+}
+
+// Handle doctor selection
+doctorSelect.addEventListener('change', async (e) => {
+    selectedDoctorId = e.target.value;
+
+    // Clear polling
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+
+    if (!selectedDoctorId) {
+        resetChatUI();
+        return;
+    }
+
+    const doctorName = e.target.options[e.target.selectedIndex].textContent;
+    chatWith.textContent = `Chat with ${doctorName}`;
+    deleteChatBtn.style.display = 'block';
+
+    // Load conversation
+    await loadConversation(selectedDoctorId);
+
+    // Enable chat input
+    chatInput.disabled = false;
+    sendBtn.disabled = false;
+
+    // Start polling for new messages
+    startPolling();
+});
+
+// Load conversation with selected doctor
+async function loadConversation(doctorId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/messages/conversation/${doctorId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            displayConversation(data.conversation);
+        } else {
+            console.error('Failed to load conversation:', data.error);
+            chatBox.innerHTML = `<div class="error-message">Failed to load conversation: ${data.error}</div>`;
+        }
+    } catch (error) {
+        console.error('Error loading conversation:', error);
+        chatBox.innerHTML = '<div class="error-message">Error loading conversation</div>';
+    }
+}
+
+// Display conversation
+function displayConversation(conversation) {
+    chatBox.innerHTML = '';
+
+    if (conversation.length === 0) {
+        chatBox.innerHTML = `
+            <div class="empty-chat">
+                <i class="fas fa-comments"></i>
+                <h3>No messages yet</h3>
+                <p>Start the conversation!</p>
+            </div>
+        `;
+        return;
+    }
+
+    conversation.forEach(msg => {
+        displayMessage(msg);
+    });
+
+    scrollToBottom();
+}
+
+// Display single message
+function displayMessage(msg) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `message ${msg.isFromCurrentUser ? 'sent' : 'received'}`;
+
+    const messageContent = document.createElement("div");
+    messageContent.className = "message-content";
+
+    const messageBubble = document.createElement("div");
+    messageBubble.className = "message-bubble";
+    messageBubble.textContent = msg.message;
+
+    const messageTime = document.createElement("div");
+    messageTime.className = "message-time";
+    messageTime.textContent = formatTimestamp(msg.createdAt);
+
+    messageContent.appendChild(messageBubble);
+    messageContent.appendChild(messageTime);
+
+    messageDiv.appendChild(messageContent);
+
+    chatBox.appendChild(messageDiv);
+}
+
+// Send message to selected doctor
+async function sendMessage() {
+    const messageText = chatInput.value.trim();
+    if (!messageText || !selectedDoctorId) return;
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/messages/send', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: messageText,
+                receiverId: parseInt(selectedDoctorId)
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Clear input
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            // Reload conversation to show new message
+            await loadConversation(selectedDoctorId);
+        } else {
+            console.error('Failed to send message:', data.error);
+            alert(`Failed to send message: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Error sending message');
+    }
+}
+
+// Delete chat with selected doctor
+async function deleteChat() {
+    if (!selectedDoctorId) return;
+
+    if (!confirm('Are you sure you want to delete this chat history?')) {
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/messages/conversation/${selectedDoctorId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Reset UI
+            doctorSelect.value = '';
+            resetChatUI();
+
+            // Clear polling
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        } else {
+            console.error('Failed to delete chat:', data.error);
+            alert(`Failed to delete chat: ${data.error}`);
+        }
+    } catch (error) {
+        console.error('Error deleting chat:', error);
+        alert('Error deleting chat');
+    }
+}
+
+// Polling for new messages
+function startPolling() {
+    if (pollingInterval) return;
+
+    pollingInterval = setInterval(async () => {
+        if (selectedDoctorId) {
+            await loadConversation(selectedDoctorId);
+        }
+    }, 3000); // Poll every 3 seconds
+}
+
+// Reset chat UI
+function resetChatUI() {
+    selectedDoctorId = null;
+    chatWith.textContent = 'Select a doctor';
+    deleteChatBtn.style.display = 'none';
+    chatInput.disabled = true;
+    sendBtn.disabled = true;
+    chatBox.innerHTML = `
+        <div class="empty-chat">
+            <i class="fas fa-comments"></i>
+            <h3>No conversation selected</h3>
+            <p>Select a doctor to start chatting</p>
+        </div>
+    `;
+}
+
+// Modal functions
+function cancelDelete() {
+    deleteModal.classList.remove('active');
+}
+
+function confirmDelete() {
+    deleteModal.classList.remove('active');
+    deleteChat();
+}
+
+// Helper functions
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function scrollToBottom() {
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Auto-resize textarea
+chatInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+// Event listeners
+sendBtn.addEventListener('click', sendMessage);
+
+chatInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadDoctors();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+});
+</script>
+{% endblock %}

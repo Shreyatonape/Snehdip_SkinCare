@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Chat with Patients</title>
+</head>
+<body>
+
+<h2>Registered Patients</h2>
+
+<ul>
+{% for p in patients %}
+  <li>
+    {{ p.username }} ({{ p.email }})
+    |
+    <a href="{{ url_for('doctor_chat',
+        patient_id=p.id,
+        patient_name=p.username) }}">
+        Chat
+    </a>
+  </li>
+{% endfor %}
+</ul>
+
+</body>
+</html>

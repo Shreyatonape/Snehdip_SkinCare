@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat with Doctor</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f5f5f5;
+    flex-direction: column;
+}
+.chat-container {
+    width: 90%;
+    max-width: 600px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #fff;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    height: 550px;
+}
+#chatResponse {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+.user-message {
+    text-align: right;
+    margin: 5px 0;
+    color: #fff;
+    background: #42a5f5;
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+.bot-message {
+    text-align: left;
+    margin: 5px 0;
+    color: #333;
+    background: #eee;
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    resize: none;
+}
+button {
+    margin-top: 5px;
+    padding: 10px 15px;
+    border: none;
+    background: #42a5f5;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+}
+button:hover {
+    background: #ff4081;
+}
+iframe {
+    width: 100%;
+    height: 0px;
+    display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div id="chatResponse">
+        <div class="bot-message"><strong>Doctor Bot:</strong> Hello! How can I help you?</div>
+    </div>
+
+    <textarea id="userQuestion" rows="2" placeholder="Ask about skin problems..."></textarea>
+    <button id="btnAsk">Send</button>
+
+    <!-- Hidden Dialogflow iframe -->
+    <iframe id="dfIframe" src="https://bot.dialogflow.com/b886d3d8-6157-4f2f-bf48-04f287e04f6b"></iframe>
+</div>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+const chatResponse = document.getElementById("chatResponse");
+const userQuestion = document.getElementById("userQuestion");
+const btnAsk = document.getElementById("btnAsk");
+
+btnAsk.addEventListener("click", async () => {
+    const question = userQuestion.value.trim();
+    if (!question) {
+        alert("Please type a question");
+        return;
+    }
+
+    // Add user message immediately
+    const userDiv = document.createElement("div");
+    userDiv.className = "user-message";
+    userDiv.innerHTML = `<strong>You:</strong> ${question}`;
+    chatResponse.appendChild(userDiv);
+
+    // Clear input and scroll
+    userQuestion.value = "";
+    chatResponse.scrollTop = chatResponse.scrollHeight;
+
+    // Add loading message
+    const loadingDiv = document.createElement("div");
+    loadingDiv.className = "bot-message";
+    loadingDiv.innerHTML = `<strong>Doctor Bot:</strong> <em>Typing...</em>`;
+    loadingDiv.id = "loading-message";
+    chatResponse.appendChild(loadingDiv);
+    chatResponse.scrollTop = chatResponse.scrollHeight;
+
+    try {
+        const res = await fetch("/api/chatbot/ask", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: JSON.stringify({ message: question })
+        });
+
+        // Remove loading message
+        const loadingMsg = document.getElementById("loading-message");
+        if (loadingMsg) loadingMsg.remove();
+
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        // Add bot response
+        const botDiv = document.createElement("div");
+        botDiv.className = "bot-message";
+        botDiv.innerHTML = `<strong>Doctor Bot:</strong> ${data.reply || "Sorry, I couldn't understand that."}`;
+        chatResponse.appendChild(botDiv);
+        chatResponse.scrollTop = chatResponse.scrollHeight;
+
+    } catch (error) {
+        // Remove loading message
+        const loadingMsg = document.getElementById("loading-message");
+        if (loadingMsg) loadingMsg.remove();
+
+        // Add error message
+        const errorDiv = document.createElement("div");
+        errorDiv.className = "bot-message";
+        errorDiv.innerHTML = `<strong>Doctor Bot:</strong> ⚠️ Connection error. Please try again.`;
+        chatResponse.appendChild(errorDiv);
+        chatResponse.scrollTop = chatResponse.scrollHeight;
+
+        console.error("Chat error:", error);
+    }
+});
+
+// Allow Enter key to send message
+userQuestion.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        btnAsk.click();
+    }
+});
+</script>
+
+</body>
+</html>

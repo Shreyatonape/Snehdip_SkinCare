@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Doctor-Patient Chat | Snehdip SkinCare</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-container {
+            width: 90%;
+            max-width: 800px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #42a5f5, #ff4081);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.patient {
+            background: #e3f2fd;
+            color: #1976d2;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.doctor {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system {
+            background: #fff3e0;
+            color: #f57c00;
+            align-self: center;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input input:focus {
+            border-color: #42a5f5;
+        }
+
+        .chat-input button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #42a5f5, #ff4081);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .chat-input button:hover {
+            transform: scale(1.05);
+        }
+
+        .chat-input button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .status-indicator {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .status-indicator.connected {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .status-indicator.disconnected {
+            color: #f44336;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-info {
+            padding: 15px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: white;
+        }
+
+        .role-badge.patient {
+            background: #42a5f5;
+        }
+
+        .role-badge.doctor {
+            background: #ff4081;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            🏥 Snehdip SkinCare - Doctor-Patient Chat
+        </div>
+
+        <div class="user-info">
+            <div>
+                <span id="userName">Loading...</span>
+                <span id="userRole" class="role-badge">Unknown</span>
+            </div>
+            <div class="status-indicator" id="status">
+                🔴 Connecting...
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message system">
+                Welcome to Snehdip SkinCare chat! Connecting to server...
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Type your message..." disabled>
+            <button id="sendBtn" disabled>Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://127.0.0.1:5000';
+        let socket = null;
+        let currentUser = null;
+        let currentRole = null;
+        let currentRoom = null;
+        let isConnected = false;
+
+        // DOM Elements
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusEl = document.getElementById('status');
+        const userNameEl = document.getElementById('userName');
+        const userRoleEl = document.getElementById('userRole');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeAuth();
+            initializeSocket();
+        });
+
+        // Authentication
+        function initializeAuth() {
+            // For demo: Get user info from localStorage or prompt
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role') || prompt('Enter role (patient/doctor):', 'patient');
+            const name = localStorage.getItem('username') || prompt('Enter your name:', 'User');
+
+            currentUser = name;
+            currentRole = role;
+
+            userNameEl.textContent = name;
+            userRoleEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+            userRoleEl.className = `role-badge ${role}`;
+
+            // Save to localStorage
+            localStorage.setItem('role', role);
+            localStorage.setItem('username', name);
+        }
+
+        // Socket.IO Connection
+        function initializeSocket() {
+            socket = io(API_BASE);
+
+            socket.on('connect', () => {
+                isConnected = true;
+                updateStatus('🟢 Connected', 'connected');
+                enableChat(true);
+                addSystemMessage('Connected to chat server!');
+
+                // Join appropriate room
+                joinRoom();
+            });
+
+            socket.on('disconnect', () => {
+                isConnected = false;
+                updateStatus('🔴 Disconnected', 'disconnected');
+                enableChat(false);
+                addSystemMessage('Lost connection to server...');
+            });
+
+            socket.on('new_message', (data) => {
+                addMessage(data.message, data.sender, data.timestamp);
+            });
+
+            socket.on('system_message', (data) => {
+                addSystemMessage(data.message);
+            });
+        }
+
+        // Room Management
+        function joinRoom() {
+            if (!currentRole || !currentUser) return;
+
+            // Create room based on role
+            if (currentRole === 'patient') {
+                currentRoom = `patient_room_${currentUser}`;
+            } else {
+                currentRoom = `doctor_room_${currentUser}`;
+            }
+
+            socket.emit('join', { room: currentRoom, user: currentUser, role: currentRole });
+            addSystemMessage(`Joined ${currentRole} chat room`);
+        }
+
+        // Message Sending
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || !isConnected) return;
+
+            const messageData = {
+                room: currentRoom,
+                sender: currentRole,
+                message: message,
+                user: currentUser,
+                timestamp: new Date().toISOString()
+            };
+
+            socket.emit('message', messageData);
+            addMessage(message, currentRole, messageData.timestamp);
+            messageInput.value = '';
+        }
+
+        // UI Functions
+        function addMessage(content, sender, timestamp) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+
+            const time = timestamp ? new Date(timestamp).toLocaleTimeString() : '';
+            const senderName = sender === currentRole ? 'You' : (sender.charAt(0).toUpperCase() + sender.slice(1));
+
+            messageDiv.innerHTML = `
+                <strong>${senderName}:</strong> ${content}
+                ${time ? `<br><small>${time}</small>` : ''}
+            `;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addSystemMessage(content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message system';
+            messageDiv.textContent = content;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function updateStatus(text, className) {
+            statusEl.textContent = text;
+            statusEl.className = `status-indicator ${className}`;
+        }
+
+        function enableChat(enabled) {
+            messageInput.disabled = !enabled;
+            sendBtn.disabled = !enabled;
+        }
+
+        // Event Listeners
+        sendBtn.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Test API Connection
+        async function testAPI() {
+            try {
+                const response = await fetch(`${API_BASE}/api/chatbot/ask`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'test' })
+                });
+
+                if (response.ok) {
+                    addSystemMessage('API connection test successful!');
+                } else {
+                    addSystemMessage('API connection test failed!');
+                }
+            } catch (error) {
+                addSystemMessage('API connection error: ' + error.message);
+            }
+        }
+
+        // Test API after connection
+        setTimeout(testAPI, 2000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Doctor Availability | Snehdip SkinCare</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(135deg,#020617,#0f172a);
+    color:#fff;
+    padding:40px;
+}
+.container{
+    max-width:900px;
+    margin:auto;
+}
+h2{
+    font-size:32px;
+    margin-bottom:30px;
+    text-align:center;
+}
+.card{
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+    padding:25px;
+    margin-bottom:20px;
+}
+.doctor-name{
+    font-size:22px;
+    font-weight:600;
+    text-align:center;
+    margin-bottom:15px;
+}
+.status{
+    background:#16a34a;
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:12px;
+    display:inline-block;
+    margin:12px 0 20px;
+}
+.slot{
+    background:#1e293b;
+    padding:16px;
+    border-radius:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+.slot-info{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+.slot-date{
+    color:#94a3b8;
+    font-size:14px;
+}
+.slot-time{
+    font-size:16px;
+    font-weight:600;
+}
+.slot-actions{
+    display:flex;
+    gap:10px;
+}
+.slot form{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+.slot input{
+    padding:8px;
+    border-radius:8px;
+    border:none;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+}
+.slot input[type="date"]{
+    min-width:140px;
+}
+.slot input[type="time"]{
+    min-width:100px;
+}
+button{
+    background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+    border:none;
+    padding:8px 16px;
+    border-radius:20px;
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.2s;
+}
+button:hover{
+    transform:scale(1.05);
+}
+button.delete{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+button.add{
+    background:linear-gradient(135deg,#10b981,#059669);
+    padding:12px 24px;
+    font-size:16px;
+}
+.add-availability{
+    text-align:center;
+    margin-top:30px;
+}
+.add-availability form{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+}
+.add-availability input{
+    padding:10px;
+    border-radius:8px;
+    border:none;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+}
+.empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:#94a3b8;
+}
+.empty-state h3{
+    font-size:24px;
+    margin-bottom:15px;
+    color:#64748b;
+}
+.availability-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.time-slot {
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+.time-slot.available-slot {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.05);
+}
+.time-slot.booked-slot {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.05);
+    opacity: 0.8;
+}
+.time-slot:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-2px);
+}
+.time-slot.booked-slot:hover {
+    background: rgba(239, 68, 68, 0.08);
+}
+.slot-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.slot-date {
+    color: #10b981;
+    font-weight: 600;
+    font-size: 14px;
+}
+.slot-time {
+    font-size: 18px;
+    font-weight: 600;
+    color: #38bdf8;
+}
+.slot-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-top: 4px;
+}
+.available-slot .slot-status {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+.booked-slot .slot-status {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+.book-btn {
+    background: linear-gradient(135deg, #42a5f5, #ff4081);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+.book-btn:hover {
+    transform: scale(1.05);
+}
+.booked-btn {
+    background: linear-gradient(135deg, #64748b, #475569);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    color: white;
+    font-weight: 600;
+    cursor: not-allowed;
+    opacity: 0.7;
+    display: inline-block;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📅 Dr. Snehal Kuldip Patil's Availability</h2>
+
+<div class="card">
+    <div class="doctor-name">👨‍⚕️ Dr. Snehal Kuldip Patil</div>
+    <div class="status">✅ Available for Appointments</div>
+
+    <p style="text-align:center; color:#94a3b8; margin-bottom:20px;">
+        View Dr. Snehal Kuldip Patil's available time slots. Patients can book appointments during these hours.
+    </p>
+
+{% if availability and availability|length > 0 %}
+    <div class="availability-list">
+    {% for s in availability %}
+          <div class="time-slot {% if s.is_booked %}booked-slot{% else %}available-slot{% endif %}">
+            <div class="slot-info">
+              <div class="slot-date">
+                📅 {{ s.date.strftime('%B %d, %Y') }}
+              </div>
+              <div class="slot-time">
+                ⏰ {{ s.start_time.strftime('%I:%M %p') }} –
+                {{ s.end_time.strftime('%I:%M %p') }}
+              </div>
+              {% if s.is_booked %}
+                <div class="slot-status">📌 Booked</div>
+              {% else %}
+                <div class="slot-status">✅ Available</div>
+              {% endif %}
+            </div>
+            {% if not s.is_booked %}
+             <a href="{{ url_for('contact_view') }}" class="book-btn">📋 Book Now</a>
+            {% else %}
+              <div class="booked-btn">🔒 Unavailable</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+{% else %}
+    <div class="empty-state">
+        <h3>📭 No Availability Set</h3>
+        <p>You haven't set any available time slots yet.</p>
+        <p>Add your first availability below to start receiving appointments!</p>
+    </div>
+{% endif %}
+
+</div>
+
+<div class="card add-availability">
+    <h3>➕ Add New Availability</h3>
+    <form method="POST" action="{{ url_for('add_availability') }}">
+        <input type="date" name="date" required min="{{ today_date }}">
+        <input type="time" name="start_time" required>
+        <input type="time" name="end_time" required>
+        <button type="submit" class="add">📅 Add Time Slot</button>
+    </form>
+</div>
+
+</div>
+
+</body>
+</html>

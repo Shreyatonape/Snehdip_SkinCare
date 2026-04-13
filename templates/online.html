@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buy Medicine Online | Snehdip SkinCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+
+    body {
+        background: url("{{ url_for('static', filename='images/hospital2.jpeg') }}") no-repeat center center/cover;
+        background-attachment: fixed;
+        color: #fff;
+        overflow-x: hidden;
+    }
+
+    header.nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(10, 10, 15, 0.75);
+      backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 40px;
+      z-index: 1000;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    header.nav .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    header.nav .brand span {
+      background: linear-gradient(45deg, #00f2fe, #4facfe, #ff6ec4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header.nav nav a {
+      margin: 0 12px;
+      text-decoration: none;
+      color: #eaeaea;
+      font-weight: 500;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      padding: 8px 14px;
+      border-radius: 25px;
+    }
+
+    header.nav nav a:hover,
+    header.nav nav a.active {
+      background: linear-gradient(135deg, #00f2fe, #4facfe, #ff6ec4);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    main.hero {
+      display: flex;
+      justify-content: center;
+      padding: 140px 80px 80px;
+      min-height: 100vh;
+      align-items: flex-start;
+    }
+
+    .info-box {
+      background: rgba(138, 137, 137, 0.75);
+      backdrop-filter: blur(10px);
+      color: #222;
+      padding: 40px 30px;
+      border-radius: 20px;
+      width: 85%;
+      max-width: 900px;
+      text-align: center;
+      font-size: 17px;
+      line-height: 1.7;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    .info-box h2 {
+      margin-bottom: 15px;
+      font-size: 32px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #b30059, #e60073, #ff3385);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: slideDown 1.2s ease;
+    }
+
+    .info-box h3 {
+      margin-top: 20px;
+      font-size: 22px;
+      color: #b30059;
+    }
+
+    .buy-btn {
+      background: linear-gradient(135deg, #b30059, #e60073, #ff3385);
+      color: #fff;
+      font-size: 22px;
+      font-weight: bold;
+      padding: 16px 40px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      transition: all 0.3s ease-in-out;
+      margin: 40px 0 100px 0;
+    }
+
+    .buy-btn:hover {
+      background: linear-gradient(135deg, #99004d, #cc0066, #ff1a75);
+      transform: scale(1.08);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes slideDown {
+      from {opacity: 0; transform: translateY(-20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      background: rgba(10,10,15,0.85);
+      color: #bdbdbd;
+      font-size: 0.9rem;
+      margin-top: 50px;
+    }
+
+    footer span {
+      background: linear-gradient(45deg, #00f2fe, #4facfe, #ff6ec4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 600;
+    }
+
+    @media(max-width:1024px){
+      main.hero { padding: 140px 40px 60px; }
+    }
+
+    @media(max-width:600px){
+      header.nav { flex-direction: column; gap: 10px; padding: 10px 20px; }
+      .info-box { padding: 25px 15px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="brand">
+    Snehdip <span>SkinCare</span>
+  </div>
+  <nav>
+    <a href="{{ url_for('index_view') }}" class="active">Home</a>
+    <a href="{{ url_for('register') }}" class="btn">Register</a>
+    <a href="{{ url_for('login_view') }}">Login</a>
+    <a href="{{ url_for('upload_view') }}">Upload</a>
+<a href="{{ url_for('hospitals_view') }}">Hospital</a>
+<a href="{{ url_for('contact_view') }}">Contact Doctor</a>
+<a href="{{ url_for('online_view') }}">Buy medicine</a>
+<a href="{{ url_for('about_view') }}">About</a>
+
+  </nav>
+</header>
+
+<main class="hero">
+  <div class="info-box">
+    <h2> Welcome to TiraBeauty!</h2>
+    <p>
+      Buying medicines has never been easier!
+      With <b>TiraBeauty</b>, you can order genuine medicines online anytime, anywhere.
+      Simply upload your prescription and enjoy safe, fast doorstep delivery.
+    </p>
+    <p>
+      ✅ 30,000+ Medicines Available <br>
+      ✅ 5 Million+ Happy Customers <br>
+      ✅ Fast & Reliable Home Delivery <br>
+      ✅ Exciting Discounts & Offers <br>
+      ✅ 100% Genuine & Trusted Pharmacies
+    </p>
+
+    <h3> Buying Medicine Online</h3>
+    <p style="text-align:left; margin-left:15%; margin-right:15%;">
+      ✅ Convenience – Order anytime, anywhere without visiting the store. <br>
+      ✅ Privacy – Get medicines discreetly delivered at home. <br>
+      ✅ Easy Price Comparison – Choose best deals instantly. <br>
+      ✅ Time-Saving – Avoid long queues at medical shops. <br>
+      ✅ Wide Range – Access thousands of medicines & health products. <br>
+      ✅ Safe & Verified – Only genuine medicines from trusted pharmacies.
+    </p>
+
+    <p>
+      No more long queues at medical stores – save time, money, and effort.
+      👉 Click below and shop smart with TiraBeauty today!
+    </p>
+
+    <button class="buy-btn" onclick="window.open('https://www.tirabeauty.com/collection/skin','_blank')">
+      Buy Medicine Online
+    </button>
+  </div>
+</main>
+
+<footer>
+  © 2025 <span>Snehdip SkinCare</span>. All rights reserved.
+</footer>
+
+</body>
+</html>

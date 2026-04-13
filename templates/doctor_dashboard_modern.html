@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+
+<html lang="{{ session.get('lang', 'en') }}">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ translate('doctor') }} {{ translate('dashboard') }} | Snehdip SkinCare</title>
+
+
+    <!-- Modern Design -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="{{ url_for('static', filename='css/modern-design.css') }}" rel="stylesheet">
+
+
+    <!-- Icons -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body>
+
+    <!-- Modern Navigation -->
+
+    <header class="modern-nav">
+
+        <div class="d-flex justify-between align-center p-2">
+
+            <a href="{{ url_for('doctor_dashboard') }}" class="nav-brand">
+
+                <i class="fas fa-hospital"></i>
+
+                <span>Snehdip</span>
+
+            </a>
+
+
+            <nav class="nav-links">
+
+                <a href="{{ url_for('doctor_dashboard') }}" class="nav-link active">
+
+                    <i class="fas fa-tachometer-alt"></i>
+
+                    {{ translate('dashboard') }}
+
+                </a>
+
+                <a href="{{ url_for('doctor_appointments_page') }}" class="nav-link">
+
+                    <i class="fas fa-calendar-check"></i>
+
+                    {{ translate('my_appointments') }}
+
+                </a>
+
+                <a href="{{ url_for('doctor_availability_page') }}" class="nav-link">
+
+                    <i class="fas fa-clock"></i>
+
+                    {{ translate('availability') }}
+
+                </a>
+
+                <a href="{{ url_for('chat_view') }}" class="nav-link">
+
+                    <i class="fas fa-comments"></i>
+
+                    {{ translate('chat') }}
+
+                </a>
+
+                <a href="{{ url_for('logout_view') }}" class="nav-link">
+
+                    <i class="fas fa-sign-out-alt"></i>
+
+                    {{ translate('logout') }}
+
+                </a>
+
+            </nav>
+
+        </div>
+
+    </header>
+
+
+    <!-- Modern Sidebar -->
+
+    <aside class="modern-sidebar">
+
+        <!-- Profile Section -->
+
+        <div class="sidebar-header">
+
+            <div class="text-center mb-3">
+
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+
+                    <i class="fas fa-user-md" style="color: white; font-size: 32px;"></i>
+
+                </div>
+
+                <h2>{{ translate('logged_in_as_doctor') }}</h2>
+
+                <h3 style="color: var(--primary-color);">Dr. {{ doctor.name }}</h3>
+
+                <p style="color: var(--text-muted); font-size: 14px;">{{ doctor.specialization }}</p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Navigation Menu -->
+
+        <ul class="sidebar-menu">
+
+            <li class="sidebar-item">
+
+                <a href="{{ url_for('doctor_dashboard') }}" class="sidebar-link active">
+
+                    <i class="fas fa-tachometer-alt"></i>
+
+                    {{ translate('dashboard') }}
+
+                </a>
+
+            </li>
+
+            <li class="sidebar-item">
+
+                <a href="{{ url_for('doctor_appointments_page') }}" class="sidebar-link">
+
+                    <i class="fas fa-calendar-check"></i>
+
+                    {{ translate('my_appointments') }}
+
+                </a>
+
+            </li>
+
+            <li class="sidebar-item">
+
+                <a href="{{ url_for('doctor_availability_page') }}" class="sidebar-link">
+
+                    <i class="fas fa-clock"></i>
+
+                    {{ translate('my_availability') }}
+
+                </a>
+
+            </li>
+
+            <li class="sidebar-item">
+
+                <a href="{{ url_for('chat_view') }}" class="sidebar-link">
+
+                    <i class="fas fa-comments"></i>
+
+                    {{ translate('chat_patients') }}
+
+                </a>
+
+            </li>
+
+            <li class="sidebar-item">
+
+                <a href="{{ url_for('edit_profile') }}" class="sidebar-link">
+
+                    <i class="fas fa-user-edit"></i>
+
+                    {{ translate('edit_profile') }}
+
+                </a>
+
+            </li>
+
+        </ul>
+
+
+        <!-- Language Selector -->
+
+        <div class="mt-4">
+
+            <h4 style="color: var(--text-secondary); margin-bottom: 12px; font-size: 14px;">{{ translate('select_language') }}</h4>
+
+            <div class="d-flex" style="gap: 8px; flex-direction: column;">
+
+                <a href="/set-language/en" class="btn btn-secondary w-full {% if session.get('lang') == 'en' %}active{% endif %}">
+
+                    🇺🇸 English
+
+                </a>
+
+                <a href="/set-language/hi" class="btn btn-secondary w-full {% if session.get('lang') == 'hi' %}active{% endif %}">
+
+                    🇮🇳 हिंदी
+
+                </a>
+
+                <a href="/set-language/mr" class="btn btn-secondary w-full {% if session.get('lang') == 'mr' %}active{% endif %}">
+
+                    🇮🇳 मराठी
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+
+    <main style="margin-left: 280px; padding: 100px 24px 24px; min-height: 100vh;">
+
+        <!-- Welcome Card -->
+
+        <div class="glass-card fade-in mb-4">
+
+            <div class="glass-card-header">
+
+                <i class="fas fa-heartbeat"></i>
+
+                {{ translate('welcome') }}, Dr. {{ doctor.name }}!
+
+            </div>
+
+
+            <div class="d-flex align-center mb-3">
+
+                <div style="text-align: center;">
+
+                    <i class="fas fa-stethoscope" style="font-size: 48px; color: var(--primary-color); margin-bottom: 16px;"></i>
+
+                    <h3 style="color: var(--text-primary); margin-bottom: 8px;">{{ translate('logged_in_as_doctor') }}</h3>
+
+                    <p style="color: var(--text-secondary);">{{ translate('explore_dashboard') }}</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Quick Stats -->
+
+        <div class="d-flex" style="gap: 20px; margin-bottom: 20px;">
+
+            <div class="glass-card" style="flex: 1; text-align: center;">
+
+                <div class="glass-card-header">
+
+                    <i class="fas fa-calendar-check"></i>
+
+                    {{ translate('my_appointments') }}
+
+                </div>
+
+                <div style="font-size: 32px; font-weight: 700; color: var(--primary-color); margin: 16px 0;">
+
+                    {{ total_appointments }}
+
+                </div>
+
+                <p style="color: var(--text-muted);">{{ translate('total_appointments', 'Total appointments') }}</p>
+
+            </div>
+
+
+            <div class="glass-card" style="flex: 1; text-align: center;">
+
+                <div class="glass-card-header">
+
+                    <i class="fas fa-clock"></i>
+
+                    {{ translate('my_availability') }}
+
+                </div>
+
+                <div style="font-size: 32px; font-weight: 700; color: var(--success-color); margin: 16px 0;">
+
+                    {{ total_availability }}
+
+                </div>
+
+                <p style="color: var(--text-muted);">{{ translate('total_slots', 'Available time slots') }}</p>
+
+            </div>
+
+
+            <div class="glass-card" style="flex: 1; text-align: center;">
+
+                <div class="glass-card-header">
+
+                    <i class="fas fa-comments"></i>
+
+                    {{ translate('chat') }}
+
+                </div>
+
+                <div style="font-size: 32px; font-weight: 700; color: var(--warning-color); margin: 16px 0;">
+
+                    {{ unread_messages }}
+
+                </div>
+
+                <p style="color: var(--text-muted);">{{ translate('unread_messages', 'Unread messages') }}</p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Recent Activity -->
+
+        <div class="glass-card slide-up">
+
+            <div class="glass-card-header">
+
+                <i class="fas fa-history"></i>
+
+                {{ translate('recent_activity', 'Recent Activity') }}
+
+            </div>
+
+
+            <div class="p-3">
+
+                {% if recent_appointments %}
+
+                    <div class="activity-list">
+
+                        {% for appointment in recent_appointments[:5] %}
+
+                        <div class="activity-item d-flex align-center" style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+
+                            <div style="flex: 1;">
+
+                                <div class="d-flex align-center">
+
+                                    <i class="fas fa-calendar" style="margin-right: 8px; color: var(--text-muted); font-size: 14px;"></i>
+
+                                    <div>
+
+                                        <div style="font-weight: 600; color: var(--text-primary);">{{ appointment.patient_name }}</div>
+
+                                        <div style="font-size: 12px; color: var(--text-secondary);">{{ appointment.date.strftime('%Y-%m-%d') }} at {{ appointment.time.strftime('%I:%M %p') }}</div>
+
+                                    </div>
+
+                                </div>
+
+                                <div style="margin-left: auto;">
+
+                                    {% if appointment.status == 'Pending' %}
+
+                                        <span class="status-badge status-warning">
+
+                                            <i class="fas fa-clock"></i>
+
+                                            {{ translate('pending') }}
+
+                                        </span>
+
+                                    {% elif appointment.status == 'Completed' %}
+
+                                        <span class="status-badge status-success">
+
+                                            <i class="fas fa-check-circle"></i>
+
+                                            {{ translate('completed') }}
+
+                                        </span>
+
+                                    {% elif appointment.status == 'Rejected' %}
+
+                                        <span class="status-badge status-danger">
+
+                                            <i class="fas fa-times-circle"></i>
+
+                                            {{ translate('rejected') }}
+
+                                        </span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% else %}
+
+                    <div class="text-center p-4">
+
+                        <i class="fas fa-calendar-times" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px;"></i>
+
+                        <h4 style="color: var(--text-secondary); margin-bottom: 8px;">{{ translate('no_recent_activity', 'No recent activity') }}</h4>
+
+                        <p style="color: var(--text-muted);">{{ translate('no_activity_desc', 'Your appointments and activity will appear here.') }}</p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- Quick Actions -->
+
+        <div class="glass-card slide-up">
+
+            <div class="glass-card-header">
+
+                <i class="fas fa-bolt"></i>
+
+                {{ translate('quick_actions', 'Quick Actions') }}
+
+            </div>
+
+
+            <div class="d-flex" style="gap: 12px; flex-wrap: wrap;">
+
+                <a href="{{ url_for('doctor_availability_page') }}" class="btn btn-primary">
+
+                    <i class="fas fa-plus-circle"></i>
+
+                    {{ translate('add_availability', 'Add Availability') }}
+
+                </a>
+
+                <a href="{{ url_for('doctor_appointments_page') }}" class="btn btn-success">
+
+                    <i class="fas fa-calendar-alt"></i>
+
+                    {{ translate('view_appointments', 'View All Appointments') }}
+
+                </a>
+
+                <a href="{{ url_for('chat_view') }}" class="btn btn-secondary">
+
+                    <i class="fas fa-comments"></i>
+
+                    {{ translate('open_chat', 'Open Chat') }}
+
+                </a>
+
+                <a href="{{ url_for('edit_profile') }}" class="btn btn-secondary">
+
+                    <i class="fas fa-user-edit"></i>
+
+                    {{ translate('edit_profile') }}
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- Flash Messages -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+
+                {% for category, message in messages %}
+
+                    <div class="modern-alert alert-{{ category }} fade-in">
+
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+
+                        {{ message }}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- Enhanced JavaScript -->
+
+    <script>
+
+        // Enhanced dashboard interactions
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Add hover effects to cards
+
+            const cards = document.querySelectorAll('.glass-card');
+
+            cards.forEach(function(card) {
+
+                card.addEventListener('mouseenter', function() {
+
+                    this.style.transform = 'translateY(-4px)';
+
+                });
+
+
+                card.addEventListener('mouseleave', function() {
+
+                    this.style.transform = 'translateY(0)';
+
+                });
+
+            });
+
+
+            // Animate stats numbers
+
+            const statsNumbers = document.querySelectorAll('[style*="font-size: 32px"]');
+
+            statsNumbers.forEach(function(element) {
+
+                const finalValue = element.textContent;
+
+                let currentValue = 0;
+
+                const increment = Math.ceil(parseInt(finalValue) / 50);
+
+
+                const counter = setInterval(function() {
+
+                    currentValue += increment;
+
+                    if (currentValue >= parseInt(finalValue)) {
+
+                        currentValue = parseInt(finalValue);
+
+                        clearInterval(counter);
+
+                    }
+
+                    element.textContent = currentValue;
+
+                }, 30);
+
+            });
+
+
+            // Add ripple effect to buttons
+
+            const buttons = document.querySelectorAll('.btn');
+
+            buttons.forEach(function(button) {
+
+                button.addEventListener('click', function(e) {
+
+                    const ripple = document.createElement('span');
+
+                    ripple.className = 'ripple';
+
+                    ripple.style.cssText = `
+
+                        position: absolute;
+
+                        border-radius: 50%;
+
+                        background: rgba(255, 255, 255, 0.5);
+
+                        transform: scale(0);
+
+                        animation: ripple 0.6s ease-out;
+
+                        width: 100px;
+
+                        height: 100px;
+
+                        left: 50%;
+
+                        top: 50%;
+
+                        margin-left: -50px;
+
+                        margin-top: -50px;
+
+                    `;
+
+
+                    this.style.position = 'relative';
+
+                    this.style.overflow = 'hidden';
+
+                    this.appendChild(ripple);
+
+
+                    setTimeout(function() {
+
+                        ripple.style.transform = 'scale(4)';
+
+                        ripple.style.opacity = '0';
+
+                    }, 10);
+
+
+                    setTimeout(function() {
+
+                        if (ripple.parentNode) {
+
+                            ripple.parentNode.removeChild(ripple);
+
+                        }
+
+                    }, 600);
+
+                });
+
+            });
+
+        });
+
+
+        // Add ripple animation
+
+        const style = document.createElement('style');
+
+        style.textContent = `
+
+            @keyframes ripple {
+
+                to {
+
+                    transform: scale(4);
+
+                    opacity: 0;
+
+                }
+
+            }
+
+
+            .activity-list {
+
+                max-height: 300px;
+
+                overflow-y: auto;
+
+            }
+
+
+            .activity-item:last-child {
+
+                border-bottom: none;
+
+            }
+
+
+            .w-full {
+
+                width: 100%;
+
+            }
+
+        `;
+
+        document.head.appendChild(style);
+
+    </script>
+
+</body>
+
+</html>

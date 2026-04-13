@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ translate('register') }} | Snehdip SkinCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+    body {
+      background: linear-gradient(135deg, #0d1b2a, #1b263b, #3a0ca3);
+      min-height: 100vh;
+      display: block;
+      position: relative;
+      overflow-x: hidden;
+      padding-top: 140px;
+    }
+    body::before, body::after {
+      content: "";
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,64,129,0.4), transparent);
+      animation: float 10s infinite ease-in-out;
+      z-index: -2;
+    }
+    body::after {
+      background: radial-gradient(circle, rgba(66,165,245,0.4), transparent);
+      top: 40%;
+      left: 60%;
+      animation-delay: 5s;
+    }
+    @keyframes float {0%,100%{transform: translateY(0);}50%{transform: translateY(-60px);} }
+
+    header.nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 40px;
+      z-index: 1000;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+    }
+    header.nav .brand {font-size:28px;font-weight:700;color:#fff;letter-spacing:1px;}
+    header.nav .brand span {background: linear-gradient(45deg, #42a5f5, #ff4081); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+    header.nav nav a {margin:0 12px;text-decoration:none;color:#f5f5f5;font-weight:500;font-size:15px;padding:8px 14px;border-radius:25px;transition:all 0.3s ease;}
+    header.nav nav a:hover, header.nav nav a.active {background: linear-gradient(135deg, #42a5f5, #ff4081); color:#fff; box-shadow:0 4px 15px rgba(0,0,0,0.4);}
+
+    .form-card {
+      background: rgba(255,255,255,0.08);
+      padding: 55px 45px;
+      border-radius: 25px;
+      backdrop-filter: blur(25px);
+      box-shadow: 0 15px 45px rgba(0,0,0,0.55);
+      max-width: 500px;
+      width: 90%;
+      border: 1px solid rgba(255,255,255,0.25);
+      text-align: center;
+      margin: 50px auto;
+      animation: fadeInUp 1s ease-out;
+    }
+    .form-card h2 {font-size:2.3rem;font-weight:700;margin-bottom:10px;background: linear-gradient(45deg, #42a5f5, #ff4081);-webkit-background-clip: text;-webkit-text-fill-color: transparent;}
+    .form-card .subtitle {font-size:1.1rem;color:#cfd8dc;margin-bottom:30px;}
+    .form-group {text-align:left;margin-bottom:20px;}
+    .form-group label {font-size:16px;margin-bottom:8px;display:block;color:#fff;}
+    .form-group input, .form-group select {
+      width:100%;padding:15px;border:none;border-radius:12px;
+      outline:none;font-size:16px;background:rgba(255,255,255,0.9);
+    }
+    .btn {width:100%;padding:14px;font-size:18px;font-weight:600;border:none;border-radius:12px;color:white;background:linear-gradient(135deg,#42a5f5,#ff4081);cursor:pointer;margin-top:20px;transition:all 0.35s ease;box-shadow:0 6px 20px rgba(66,165,245,0.6);}
+    .btn:hover {transform: translateY(-3px) scale(1.05); box-shadow:0 10px 30px rgba(255,64,129,0.6);}
+    .redirect {margin-top:20px;font-size:15px;color:#e0e0e0;}
+    .redirect a {color:#ffeb3b;font-weight:600;text-decoration:none;}
+    @keyframes fadeInUp {from {transform: translateY(40px);opacity:0;} to {transform: translateY(0);opacity:1;}}
+    footer {text-align:center;padding:25px;background:rgba(10,10,15,0.85);color:#bdbdbd;font-size:0.9rem;margin-top:50px;}
+    footer span {background: linear-gradient(45deg,#00f2fe,#4facfe,#ff6ec4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:600;}
+    @media(max-width:768px){.form-card {padding:35px 20px;max-width:95%;}.form-card h2{font-size:26px;}}
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="brand">Snehdip <span>SkinCare</span></div>
+  <nav>
+    <a href="{{ url_for('index_view') }}" class="active">{{ translate('home') }}</a>
+    <a href="{{ url_for('register') }}" class="btn">{{ translate('register') }}</a>
+    <a href="{{ url_for('login_view') }}">{{ translate('login') }}</a>
+    <a href="{{ url_for('hospitals_view') }}">{{ translate('hospitals') }}</a>
+    <a href="{{ url_for('about_view') }}">{{ translate('about') }}</a>
+  </nav>
+</header>
+
+<div class="form-card">
+  <h2>{{ translate('register') }}</h2>
+  <p class="subtitle">{{ translate('create_account') }}</p>
+
+  <form method="POST" action="{{ url_for('register') }}" enctype="multipart/form-data" id="registerForm">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" style="color: red; margin-bottom: 15px; padding: 10px; border: 1px solid red; border-radius: 5px; background: #ffe6e6;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div style="color:red; margin-bottom:15px;">
+
+    <!-- Role select moved to TOP
+    <div class="form-group">
+      <label>{{ translate('role') }}:</label>
+      <select name="role" id="roleSelect" required>
+        <option value="" disabled selected>{{ translate('select_role') }}</option>
+        <option value="patient">{{ translate('patient') }}</option>
+        <option value="doctor">{{ translate('doctor') }}</option>
+      </select>
+    </div>-->
+
+
+    <!-- Certificate upload for doctor -->
+
+
+        <div class="form-group">
+      <label>{{ translate('username') }}:</label>
+      <input type="text" name="username" id="username" placeholder="{{ translate('enter_username') }}" required>
+      <small id="usernameError" style="color: red; display: none;">Username must be 3-20 characters, letters and spaces only</small>
+    </div>
+
+    <div class="form-group">
+      <label>{{ translate('email') }}:</label>
+      <input type="email" name="email" id="email" placeholder="{{ translate('enter_email') }}" required>
+      <small id="emailError" style="color: red; display: none;">Please enter a valid email address</small>
+    </div>
+
+    <div class="form-group">
+      <label>{{ translate('password') }}:</label>
+      <input type="password" name="password" id="password" placeholder="{{ translate('enter_password') }}" required>
+      <small id="passwordError" style="color: red; display: none;">Password must be 8-20 characters with at least 1 letter and 1 number</small>
+    </div>
+
+    <div class="form-group">
+      <label>Confirm Password:</label>
+      <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+      <small id="confirmPasswordError" style="color: red; display: none;">Passwords do not match</small>
+    </div>
+
+    <button type="submit" class="btn">{{ translate('register') }}</button>
+    <p class="redirect">{{ translate('already_have_account') }}? <a href="{{ url_for('login_view') }}">{{ translate('login_here') }}</a></p>
+</form>
+
+<script>
+// Get form elements
+const form = document.getElementById("registerForm");
+const usernameInput = document.getElementById("username");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const confirmPasswordInput = document.getElementById("confirmPassword");
+
+// Validation functions
+function validateUsername(username) {
+    // Username must be 3-20 characters, letters and spaces only
+    const usernameRegex = /^[a-zA-Z\s]{3,20}$/;
+    return usernameRegex.test(username);
+}
+
+function validateEmail(email) {
+    // Email validation with @ and .com/.org/.net etc
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
+
+function validatePassword(password) {
+    // Password must be 8-20 characters, at least 1 letter and 1 number
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,20}$/;
+    return passwordRegex.test(password);
+}
+
+function validatePasswordsMatch(password, confirmPassword) {
+    return password === confirmPassword && password.length > 0;
+}
+
+// Real-time validation
+usernameInput.addEventListener('input', function() {
+    const username = this.value.trim();
+    const usernameError = document.getElementById("usernameError");
+    if (username.length > 0 && !validateUsername(username)) {
+        usernameError.style.display = 'block';
+        usernameError.textContent = 'Username must be 3-20 characters, letters and spaces only';
+    } else {
+        usernameError.style.display = 'none';
+    }
+});
+
+emailInput.addEventListener('input', function() {
+    const email = this.value.trim();
+    const emailError = document.getElementById("emailError");
+    if (email.length > 0 && !validateEmail(email)) {
+        emailError.style.display = 'block';
+        emailError.textContent = 'Please enter a valid email address (e.g., user@example.com)';
+    } else {
+        emailError.style.display = 'none';
+    }
+});
+
+passwordInput.addEventListener('input', function() {
+    const password = this.value;
+    const passwordError = document.getElementById("passwordError");
+    if (password.length > 0 && !validatePassword(password)) {
+        passwordError.style.display = 'block';
+        passwordError.textContent = 'Password must be 8-20 characters with at least 1 letter and 1 number';
+    } else {
+        passwordError.style.display = 'none';
+    }
+});
+
+confirmPasswordInput.addEventListener('input', function() {
+    const password = passwordInput.value;
+    const confirmPassword = this.value;
+    const confirmPasswordError = document.getElementById("confirmPasswordError");
+    if (confirmPassword.length > 0 && !validatePasswordsMatch(password, confirmPassword)) {
+        confirmPasswordError.style.display = 'block';
+        confirmPasswordError.textContent = 'Passwords do not match';
+    } else {
+        confirmPasswordError.style.display = 'none';
+    }
+});
+
+// Form submission validation
+form.addEventListener("submit", function(e) {
+    let isValid = true;
+
+    // Validate username
+    const username = usernameInput.value.trim();
+    const usernameError = document.getElementById("usernameError");
+    if (!validateUsername(username)) {
+        usernameError.style.display = 'block';
+        usernameError.textContent = 'Username must be 3-20 characters, letters and spaces only';
+        isValid = false;
+    }
+
+    // Validate email
+    const email = emailInput.value.trim();
+    const emailError = document.getElementById("emailError");
+    if (!validateEmail(email)) {
+        emailError.style.display = 'block';
+        emailError.textContent = 'Please enter a valid email address (e.g., user@example.com)';
+        isValid = false;
+    }
+
+    // Validate password
+    const password = passwordInput.value;
+    const passwordError = document.getElementById("passwordError");
+    if (!validatePassword(password)) {
+        passwordError.style.display = 'block';
+        passwordError.textContent = 'Password must be 8-20 characters with at least 1 letter and 1 number';
+        isValid = false;
+    }
+
+    // Validate password confirmation
+    const confirmPassword = confirmPasswordInput.value;
+    const confirmPasswordError = document.getElementById("confirmPasswordError");
+    if (!validatePasswordsMatch(password, confirmPassword)) {
+        confirmPasswordError.style.display = 'block';
+        confirmPasswordError.textContent = 'Passwords do not match';
+        isValid = false;
+    }
+
+    if (!isValid) {
+        e.preventDefault();
+        alert('Please fix the validation errors before submitting.');
+    }
+});
+
+// Existing role selection functionality (if it exists)
+const roleSelect = document.getElementById("roleSelect");
+const certGroup = document.getElementById("certGroup");
+const certificateInput = document.getElementById("certificate");
+
+if (roleSelect) {
+    roleSelect.addEventListener("change", function() {
+        if(this.value === "doctor") {
+            certGroup.style.display = "block";
+            certificateInput.setAttribute("required", "required");
+        } else {
+            certGroup.style.display = "none";
+            certificateInput.removeAttribute("required");
+        }
+    });
+
+    form.addEventListener("submit", function(e) {
+        if(roleSelect.value === "doctor" && certificateInput.files.length === 0) {
+            e.preventDefault();
+            alert("Please upload your certificate to register as doctor.");
+        }
+    });
+}
+</script>
+
+</body>
+</html>

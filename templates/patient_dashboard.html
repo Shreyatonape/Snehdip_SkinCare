@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+<meta charset="UTF-8">
+<title>{{ translate('patient') }} {{ translate('dashboard') }} | Snehdip SkinCare</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{
+    background:url("/static/images/upload.jpeg") no-repeat center center fixed;
+    background-size:cover;
+    min-height:100vh;
+    display:flex;
+}
+
+/* Sidebar */
+.sidebar{
+    width:260px;
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(15px);
+    padding:30px 20px;
+    height:100vh;
+    box-shadow:5px 0 25px rgba(0,0,0,0.2);
+    display:flex;
+    flex-direction:column;
+}
+.sidebar h2{
+    color:#fff;
+    font-weight:700;
+    margin-bottom:30px;
+    text-align:center;
+}
+.sidebar h2 span{
+    background:linear-gradient(45deg,#42a5f5,#ff4081);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+.sidebar a{
+    text-decoration:none;
+    margin:10px 0;
+    padding:12px 18px;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:500;
+    color:#fff;
+    transition:0.3s;
+}
+.sidebar a:hover{
+    background:linear-gradient(135deg,#42a5f5,#ff4081);
+    color:#fff;
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Main Content */
+.main{
+    flex:1;
+    padding:40px;
+    color:#fff;
+}
+.welcome-box{
+    background:rgba(255,255,255,0.15);
+    padding:30px;
+    border-radius:20px;
+    backdrop-filter:blur(15px);
+    box-shadow:0 8px 30px rgba(0,0,0,0.3);
+    max-width:600px;
+    animation:fadeIn 0.4s ease;
+}
+.welcome-box h1{
+    font-size:30px;
+    margin-bottom:10px;
+}
+.welcome-box p{
+    font-size:17px;
+    opacity:0.9;
+    margin-bottom:20px;
+}
+.logout-btn{
+    display:inline-block;
+    padding:12px 25px;
+    background:#47aeee;
+    border-radius:30px;
+    color:#fff;
+    font-weight:600;
+    text-decoration:none;
+    transition:0.3s;
+}
+.logout-btn:hover{
+    background:#5574ef;
+    transform:scale(1.05);
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2>Snehdip <span>SkinCare</span></h2>
+    <a href="{{ url_for('patient_dashboard') }}">🏠 {{ translate('dashboard') }}</a>
+    <a href="{{ url_for('patient_chat') }}">💬 {{ translate('chat_doctor') }}</a>
+    <a href="{{ url_for('contact_view') }}">📅 {{ translate('my_appointments') }}</a>
+    <a href="{{ url_for('upload_view') }}">📤 {{ translate('upload_skin_image') }}</a>
+    <a href="{{ url_for('hospitals_view') }}">🏥 {{ translate('find_hospitals') }}</a>
+    <a href="{{ url_for('patient_records_view') }}">🧾 {{ translate('open_records') }}</a>
+   <a href="{{ url_for('patient_queue_view') }}">📋 {{ translate('appointment_queue') }}</a>
+ <a href="{{ url_for('home_remedies_view') }}">🌿 {{ translate('home_remedies') }}</a>
+
+</div>
+
+<!-- Main Content -->
+<div class="main">
+    <div class="welcome-box">
+        <h1>{{ translate('welcome') }}, {{ session['username'] }} 👋</h1>
+        <p>{{ translate('logged_in_as_patient') }} <strong>{{ translate('patient') }}</strong>. {{ translate('explore_dashboard') }}.</p>
+
+        <a href="{{ url_for('logout_view') }}" class="logout-btn">{{ translate('logout') }}</a>
+    </div>
+
+</div>
+</body>
+</html>

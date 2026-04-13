@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+<meta charset="UTF-8">
+<title>{{ translate('my_records') }} | Snehdip SkinCare</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg, #0f2027, #050c12, #1b97ea);
+    min-height:100vh;
+    color:#fff;
+    padding:40px;
+}
+
+/* Page Title */
+h1{
+    text-align:center;
+    margin-bottom:30px;
+    font-size:30px;
+}
+
+/* Records Grid */
+.records-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:25px;
+}
+
+/* Record Card */
+.record-card{
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(15px);
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.3);
+    animation:fadeIn 0.4s ease;
+}
+
+.record-card img{
+    width:100%;
+    height:180px;
+    object-fit:cover;
+    border-radius:15px;
+    margin-bottom:15px;
+}
+
+.record-card h3{
+    font-size:18px;
+    margin-bottom:8px;
+}
+
+.record-card p{
+    font-size:14px;
+    margin-bottom:6px;
+    opacity:0.95;
+}
+
+/* Delete Button */
+.delete-btn{
+    margin-top:12px;
+    width:100%;
+    background:#1c93dd;
+    border:none;
+    padding:10px;
+    border-radius:10px;
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.delete-btn:hover{
+    background:#1db0c6;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<h1>📄 My AI Prediction Records</h1>
+
+<div class="records-grid" id="recordsGrid">
+    <p>Loading...</p>
+</div>
+
+<script>
+const recordsGrid = document.getElementById("recordsGrid");
+
+/* ================= FETCH RECORDS (SAME LOGIC) ================= */
+fetch("/api/records")
+.then(res => res.json())
+.then(data => {
+    recordsGrid.innerHTML = "";
+
+    if (!data || data.length === 0) {
+        recordsGrid.innerHTML = "<p>No records found.</p>";
+        return;
+    }
+
+    data.forEach(r => {
+        const card = `
+        <div class="record-card">
+            <img src="${r.image_path}" alt="Skin Image">
+
+            <h3>🧬 ${r.diagnosis}</h3>
+            <p><b>Confidence:</b> ${(r.confidence * 100).toFixed(2) || "N/A"}%</p>
+            <p><b>Risk Level:</b> ${r.risk_level || "N/A"}</p>
+            <p><b>Reason:</b> ${r.reason || "N/A"}</p>
+            <p><b>Symptoms:</b> ${r.symptoms || "N/A"}</p>
+            <p><b>Prevention:</b> ${r.prevention || "N/A"}</p>
+            <p><b>Date:</b> ${r.created_at}</p>
+
+            <button class="delete-btn" onclick="deleteRecord(${r.id})">
+                🗑 Delete Record
+            </button>
+        </div>
+        `;
+        recordsGrid.innerHTML += card;
+    });
+})
+.catch(err => {
+    console.error(err);
+    recordsGrid.innerHTML = "<p>Error loading records.</p>";
+});
+
+/* ================= DELETE RECORD (UNCHANGED) ================= */
+async function deleteRecord(recordId) {
+    if (!confirm("Are you sure you want to delete this record?")) return;
+
+    try {
+        const res = await fetch(`/api/patient/records/${recordId}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        if (!res.ok) {
+            alert("Failed to delete record");
+            return;
+        }
+
+        alert("Record deleted successfully");
+        location.reload();
+
+    } catch (err) {
+        console.error(err);
+        alert("Something went wrong");
+    }
+}
+</script>
+
+</body>
+</html>

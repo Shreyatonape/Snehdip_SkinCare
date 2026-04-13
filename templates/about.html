@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ translate('about') }} | Snehdip SkinCare</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+
+    body {
+      background: url("{{ url_for('static', filename='images/about.jpeg') }}") no-repeat center center/cover;
+      min-height: 100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+      overflow-x: hidden;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: -1;
+    }
+
+    header.nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(15, 15, 15, 0.6);
+      backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 40px;
+      z-index: 1000;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
+    }
+
+    header.nav .brand {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    header.nav .brand span {
+      background: linear-gradient(45deg, #42a5f5, #ff4081);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header.nav nav a {
+      margin: 0 12px;
+      text-decoration: none;
+      color: #f5f5f5;
+      font-weight: 500;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      padding: 8px 14px;
+      border-radius: 25px;
+    }
+
+    header.nav nav a:hover,
+    header.nav nav a.active {
+      background: linear-gradient(135deg, #42a5f5, #ff4081);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .about-card {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 50px 40px;
+      border-radius: 25px;
+      backdrop-filter: blur(25px);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+      max-width: 950px;
+      width: 100%;
+      text-align: center;
+      margin-top: 120px;
+      animation: fadeInUp 1s ease-out;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .about-card h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+
+    .about-card p {
+      font-size: 1.1rem;
+      color: #e0e0e0;
+      max-width: 750px;
+      margin: auto;
+      line-height: 1.6;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 25px;
+      margin-top: 40px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 30px 25px;
+      border-radius: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+      transition: transform 0.3s ease;
+      text-align: center;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.05);
+      box-shadow: 0 0 25px rgba(66,165,245,0.6), 0 0 25px rgba(255,64,129,0.5);
+    }
+
+    .card h3 {
+      margin-bottom: 12px;
+      color: #ff4081;
+      font-size: 1.3rem;
+    }
+
+    .card p {
+      color: #f1f1f1;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 14px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      max-height: 160px;
+      object-fit: cover;
+    }
+
+    .inline-list {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .inline-list span {
+      background: rgba(255,255,255,0.15);
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: #fff;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: rgba(10,10,15,0.85);
+      color: #bdbdbd;
+      font-size: 0.9rem;
+    }
+
+    footer span {
+      background: linear-gradient(45deg, #00f2fe, #4facfe, #ff6ec4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 600;
+    }
+
+    @keyframes fadeInUp {
+      from {transform: translateY(40px);opacity: 0;}
+      to {transform: translateY(0);opacity: 1;}
+    }
+
+    @media(max-width:768px){
+      .about-card {padding:30px 20px;max-width:95%;}
+      .about-card h1 {font-size:26px;}
+    }
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="brand">Snehdip <span>SkinCare</span></div>
+   <nav>
+    <a href="{{ url_for('index_view') }}" class="active">{{ translate('home') }}</a>
+    <a href="{{ url_for('register') }}" class="btn">{{ translate('register') }}</a>
+    <a href="{{ url_for('login_view') }}">{{ translate('login') }}</a>
+    <a href="{{ url_for('hospitals_view') }}">{{ translate('hospitals') }}</a>
+    <a href="{{ url_for('about_view') }}" class="active">{{ translate('about') }}</a>
+  </nav>
+</header>
+
+<div class="about-card">
+  <h1>{{ translate('about') }} <span style="color:#42a5f5;">Snehdip SkinCare</span></h1>
+  <p>
+    {{ translate('about_description') }}
+  </p>
+
+  <div class="features">
+    <div class="card">
+      <img src="{{ url_for('static', filename='images/login_register.jpeg') }}" alt="Login & Register">
+      <h3>🔐 {{ translate('login_register') }}</h3>
+      <p>{{ translate('create_secure_account') }}</p>
+      <div class="inline-list">
+        <span>✔ {{ translate('quick_simple_registration') }}</span>
+        <span>✔ {{ translate('encrypted_secure_login') }}</span>
+        <span>✔ {{ translate('personalized_dashboard') }}</span>
+        <span>✔ {{ translate('save_track_reports') }}</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="{{ url_for('static', filename='images/upload0.jpeg') }}" alt="Upload">
+      <h3>📤 {{ translate('upload') }}</h3>
+      <p>{{ translate('upload_description') }}</p>
+      <div class="inline-list">
+        <span>✔ {{ translate('instant_ai_prediction') }}</span>
+        <span>✔ {{ translate('probability_score') }}</span>
+        <span>✔ {{ translate('treatment_guidance') }}</span>
+        <span>✔ {{ translate('save_reports') }}</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="{{ url_for('static', filename='images/Hospitales modernos.jpeg') }}" alt="Hospitals">
+      <h3>🏥 {{ translate('hospitals') }}</h3>
+      <p>{{ translate('access_verified_hospital') }}</p>
+      <div class="inline-list">
+        <span>✔ {{ translate('nearby_hospitals') }}</span>
+        <span>✔ {{ translate('dermatologist_list') }}</span>
+        <span>✔ {{ translate('emergency_contacts') }}</span>
+        <span>✔ {{ translate('appointment_guidance') }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2025 <span>Snehdip SkinCare</span>. All rights reserved.
+</footer>
+
+</body>
+</html>
